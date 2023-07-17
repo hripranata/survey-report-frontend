@@ -1,4 +1,5 @@
 import SILogo from '/logo.png'
+import { NavLink } from 'react-router-dom';
 export default function Navbar() {
     return (
         <>
@@ -13,16 +14,16 @@ export default function Navbar() {
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                         <li className="nav-item">
-                            <a className="nav-link active" aria-current="page" href="#">Home</a>
+                            <NavLink to="/" className="nav-link">Home</NavLink>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link" href="#">Loading Survey</a>
+                            <NavLink to="/loadingsurvey" className="nav-link">Loading Survey</NavLink>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link" href="#">Bunker Survey</a>
+                            <NavLink to="/bunkersurvey" className="nav-link">Bunker Survey</NavLink>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link" href="#">Monthly Report</a>
+                            <NavLink to="/report" className="nav-link">Survey Report</NavLink>
                         </li>
                     </ul>
                     <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
@@ -31,8 +32,12 @@ export default function Navbar() {
                                 Hari Pranata
                             </a>
                             <ul className="dropdown-menu dropdown-menu-end">
-                                <li><a className="dropdown-item" href="#">Profile</a></li>
-                                <li><a className="dropdown-item" href="#">Change Password</a></li>
+                                <li className="dropdown-item">
+                                    <NavLink to="/profile" className="nav-link">Profile</NavLink>
+                                </li>
+                                <li className="dropdown-item">
+                                    <NavLink to="/password" className="nav-link">Password Change</NavLink>
+                                </li>
                                 <li><hr className="dropdown-divider"></hr></li>
                                 <li><a className="dropdown-item" href="#">Logout</a></li>
                             </ul>
