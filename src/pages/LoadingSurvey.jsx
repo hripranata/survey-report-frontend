@@ -146,7 +146,7 @@ export default function LoadingSurvey() {
                 <form className="row g-3" onSubmit={hanldeSubmit}>
                     <div className="col-12 mb-3">
                         <label htmlFor="inputLODate" className="form-label">LO Date</label>
-                        <input type="date" className="form-control" name="loDate" value={formData.loDate} onChange={handleChange}></input>
+                        <input type="date" className="form-control" name="loDate" value={formData.loDate} onChange={handleChange}/>
                     </div>
                     <div className="col-12">
                         <select className="mb-3 form-select" aria-label="Tongkang" name="tongkang" value={formData.tongkang} onChange={handleChange}>
@@ -164,21 +164,21 @@ export default function LoadingSurvey() {
                         <div className="row mb-3">
                             <div className="col">
                                 <label htmlFor="inputStart" className="form-label">Loading Start</label>
-                                <input type="time" className="form-control" name="loadStartTime" value={formData.loadStartTime} onChange={handleChange}></input>
+                                <input type="time" className="form-control" name="loadStartTime" value={formData.loadStartTime} onChange={handleChange}/>
                             </div>
                             <div className="col">
                             <label htmlFor="inputStartDate" className="form-label">Start Date</label>
-                                <input type="date" className="form-control" name="loadStartDate" value={formData.loadStartDate} onChange={handleChange}></input>
+                                <input type="date" className="form-control" name="loadStartDate" value={formData.loadStartDate} onChange={handleChange}/>
                             </div>
                         </div>
                         <div className="row">
                             <div className="col">
                                 <label htmlFor="inputStop" className="form-label">Loading Stop</label>
-                                <input type="time" className="form-control" name="loadStopTime" value={formData.loadStopTime} onChange={handleChange}></input>
+                                <input type="time" className="form-control" name="loadStopTime" value={formData.loadStopTime} onChange={handleChange}/>
                             </div>
                             <div className="col">
                                 <label htmlFor="inputStopDate" className="form-label">Stop Date</label>
-                                <input type="date" className="form-control" name="loadStopDate" value={formData.loadStopDate} onChange={handleChange}></input>
+                                <input type="date" className="form-control" name="loadStopDate" value={formData.loadStopDate} onChange={handleChange}/>
                             </div>
                         </div>
                     </div>
@@ -197,15 +197,15 @@ export default function LoadingSurvey() {
                     </div>
                     <div className="col-12">
                         <label htmlFor="inputVolLo" className="form-label">Volume LO</label>
-                        <input type="text" className="form-control" name="loVol" value={formData.loVol} onChange={handleChange}></input>
+                        <input type="text" className="form-control" name="loVol" value={formData.loVol} onChange={handleChange}/>
                     </div>
                     <div className="col-12">
                         <label htmlFor="inputVolAl" className="form-label">AL / Volume Tongkang</label>
-                        <input type="text" className="form-control" name="alVol" value={formData.alVol} onChange={handleChange}></input>
+                        <input type="text" className="form-control" name="alVol" value={formData.alVol} onChange={handleChange}/>
                     </div>
                     <div className="col-12 mb-3">
                         <label htmlFor="inputPetugas" className="form-label">Surveyor</label>
-                        <input type="text" className="form-control" name="surveyor" value={formData.surveyor} disabled></input>
+                        <input type="text" className="form-control" name="surveyor" value={formData.surveyor} disabled/>
                     </div>
                     <div className="col-12 mb-3">
                         <div className="d-grid gap-2">

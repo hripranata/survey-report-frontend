@@ -24,7 +24,7 @@ export default function Navbar() {
     );
     return (
         <>
-            <nav className="navbar fixed-top navbar-expand-lg shadow-sm p-3 mb-5 bg-body">
+            <nav className="navbar fixed-top navbar-expand-lg shadow-sm bg-body">
                 <div className="container-fluid">
                     <Link to="/home" className="navbar-brand" onClick={() => handleNavCollapse()}>
                         <img src={SILogo} alt="" height="36" width="282"></img>
