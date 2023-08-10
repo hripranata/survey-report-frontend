@@ -1,20 +1,41 @@
 import SILogo from '/logo.png'
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useState, useCallback } from "react";
+
+import { useAuth } from "../context/Auth";
+import { Link } from 'react-router-dom';
+
 export default function Navbar() {
+    const { auth, setAuth } = useAuth();
+    const navigate = useNavigate();
+
+    const [isNavCollapsed, setIsNavCollapsed] = useState(true);
+
+    const handleNavCollapse = () => setIsNavCollapsed(!isNavCollapsed);
+    
+    const logout = useCallback(
+      (e) => {
+        e.preventDefault();
+        setAuth(null);
+        localStorage.clear();
+        navigate("/login");
+      },
+      [navigate, setAuth]
+    );
     return (
         <>
-            <nav className="navbar fixed-top navbar-expand-lg bg-body-tertiary">
+            <nav className="navbar fixed-top navbar-expand-lg shadow-sm p-3 mb-5 bg-body">
                 <div className="container-fluid">
-                    <a className="navbar-brand" href="#">
-                    <img src={SILogo} alt="" height="36" width="282"></img>
-                    </a>
-                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <Link to="/home" className="navbar-brand" onClick={() => handleNavCollapse()}>
+                        <img src={SILogo} alt="" height="36" width="282"></img>
+                    </Link>
+                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onClick={() => handleNavCollapse()}>
                     <span className="navbar-toggler-icon"></span>
                     </button>
-                    <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+                    <div className={`collapse navbar-collapse ${isNavCollapsed? 'hide':'show'}`} id="navbarSupportedContent">
+                    <ul className="navbar-nav me-auto mb-2 mb-lg-0" onClick={() => handleNavCollapse()}>
                         <li className="nav-item">
-                            <NavLink to="/" className="nav-link">Home</NavLink>
+                            <NavLink to="/home" className="nav-link">Home</NavLink>
                         </li>
                         <li className="nav-item">
                             <NavLink to="/loadingsurvey" className="nav-link">Loading Survey</NavLink>
@@ -29,17 +50,17 @@ export default function Navbar() {
                     <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
                         <li className="nav-item dropdown">
                             <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Hari Pranata
+                                {auth?.data?.user?.name}
                             </a>
                             <ul className="dropdown-menu dropdown-menu-end">
                                 <li className="dropdown-item">
-                                    <NavLink to="/profile" className="nav-link">Profile</NavLink>
+                                    <NavLink to="/profile" className="nav-link"><i className="fa fa-user"></i> Profile</NavLink>
                                 </li>
                                 <li className="dropdown-item">
-                                    <NavLink to="/password" className="nav-link">Password Change</NavLink>
+                                    <NavLink to="/password" className="nav-link"><i className="fa fa-key"></i> Password Change</NavLink>
                                 </li>
                                 <li><hr className="dropdown-divider"></hr></li>
-                                <li><a className="dropdown-item" href="#">Logout</a></li>
+                                <li><button className="dropdown-item" onClickCapture={logout}><i className="fa fa-power-off"></i> Logout</button></li>
                             </ul>
                         </li>
                     </ul>
