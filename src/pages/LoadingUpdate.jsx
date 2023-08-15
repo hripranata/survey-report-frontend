@@ -83,11 +83,11 @@ export default function LoadingUpdate() {
                 loadStartDate: loadingById.start.split(' ')[0],
                 loadStopTime: loadingById.stop.split(' ')[1],
                 loadStopDate: loadingById.stop.split(' ')[0],
-                lo_detail: loadingById.lo_number,
+                lo_details: loadingById.lo_details,
                 loVol: loadingById.vol_lo,
                 alVol: loadingById.vol_al,
             }));
-            setRowsData(loadingById.lo_number)
+            setRowsData(loadingById.lo_details)
         })
         .catch((err) => {
             console.error(err);
@@ -152,7 +152,7 @@ export default function LoadingUpdate() {
             bbm: formData.bbm,
             start: `${formData.loadStartDate} ${formData.loadStartTime}`,
             stop: `${formData.loadStopDate} ${formData.loadStopTime}`,
-            lo_number: changeLoQtyType(formData.lo_detail),
+            lo_details: changeLoQtyType(formData.lo_details),
             vol_lo: formData.loVol,
             vol_al: parseInt(formData.alVol),
             // surveyor: auth.data.user.name

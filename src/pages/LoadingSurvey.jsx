@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import axios from "axios";
 import { useAuth } from "../context/Auth";
 import { useNavigate } from 'react-router-dom';
+import Select from 'react-select'
 
 function TableRows({rowsData, deleteTableRows, handleChange}) {
     return (
@@ -18,42 +19,51 @@ function TableRows({rowsData, deleteTableRows, handleChange}) {
     )
 }
 
+const datetimeNowID = (selector) => {
+    const now = new Date()
+    let datetime = now.toLocaleString('id-ID', {
+        hour12: false, 
+        hourCycle: 'h23',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    })
+    if (selector == 0) {
+        return datetime.split(', ')[0].split("/").reverse().join("-")
+    } else {
+        return datetime.split(', ')[1].substring(0,5).replace(".",":")
+    }
+}
+
 export default function LoadingSurvey() {
     const { auth } = useAuth();
     const navigate = useNavigate();
+    const [vesselOption, setVesselOption] = useState([]);
     const [rowsData, setRowsData] = useState([{
         lo_number: "",
         qty: 0,
     }]);
 
-    const datetimeNowID = (selector) => {
-        const now = new Date()
-        let datetime = now.toLocaleString('id-ID', {
-            hour12: false, 
-            hourCycle: 'h23',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-        })
-        if (selector == 0) {
-            return datetime.split(', ')[0].split("/").reverse().join("-")
-        } else {
-            return datetime.split(', ')[1].substring(0,5).replace(".",":")
-        }
+    const headers = {
+        'Content-Type' : 'application/json',
+        'Accept' : 'application/json',
+        'Authorization' : 'Bearer ' + auth.data.token
     }
+
+    const API_URL = "http://localhost:8000";
 
     const [formData, setFormData] = useState({
         loDate: datetimeNowID(0),
-        tongkang: "SPOB Kujang Jaya 1",
+        tongkang_id: 0,
         bbm: "HSD",
         loadStartTime: datetimeNowID(1),
         loadStartDate: datetimeNowID(0),
         loadStopTime: datetimeNowID(1),
         loadStopDate: datetimeNowID(0),
-        lo_detail: [],
+        lo_details: [],
         loVol: 0,
         alVol: 0,
         surveyor: auth.data.user.name
@@ -80,7 +90,7 @@ export default function LoadingSurvey() {
         const rows = [...rowsData];
         rows.splice(index, 1);
         setRowsData(rows);
-        formData.lo_detail = rows
+        formData.lo_details = rows
         formData.loVol = sumQty(rows)
     }
 
@@ -89,7 +99,7 @@ export default function LoadingSurvey() {
         const rowsInput = [...rowsData];
         rowsInput[index][name] = value;
         setRowsData(rowsInput);
-        formData.lo_detail = rowsInput
+        formData.lo_details = rowsInput
         formData.loVol = sumQty(rowsInput)
     }
 
@@ -112,22 +122,15 @@ export default function LoadingSurvey() {
 
         const loadingData = {
             lo_date: formData.loDate,
-            tongkang: formData.tongkang,
+            tongkang_id: formData.tongkang_id,
             bbm: formData.bbm,
             start: `${formData.loadStartDate} ${formData.loadStartTime}:00`,
             stop: `${formData.loadStopDate} ${formData.loadStopTime}:00`,
-            lo_number: changeLoQtyType(formData.lo_detail),
+            lo_details: changeLoQtyType(formData.lo_details),
             vol_lo: formData.loVol,
             vol_al: parseInt(formData.alVol),
             // surveyor: auth.data.user.name
         }
-        const headers = {
-            'Content-Type' : 'application/json',
-            'Accept' : 'application/json',
-            'Authorization' : 'Bearer ' + auth.data.token
-        }
-    
-        const API_URL = "http://localhost:8000";
     
         await axios.post(`${API_URL}/api/loadings`, loadingData, { headers: headers })
         .then(() => {
@@ -137,9 +140,39 @@ export default function LoadingSurvey() {
             console.error(err);
         })
     }
+
+    const handleTongkangList = async () => {
+        await axios.get(`${API_URL}/api/vessels/SPOB`, { headers: headers })
+        .then((res) => {
+            setVesselOption(changeSelectOption(res.data.data))
+        })
+        .catch((err) => {
+            console.error(err);
+        })
+    }
+
+    const changeSelectOption = (rows) => {
+        return rows.map(row => {
+            return {
+                value: row.id,
+                vessel_name: row.vessel_name
+            }
+        })
+    }
+
+    const handleChangeVessel = (selectedOption) => {
+        setFormData((prevFormData) => ({ 
+            ...prevFormData,
+            tongkang_id: selectedOption.value, 
+        }));
+    };
+
+    useEffect(() => {
+        handleTongkangList()
+    }, []);
     return (
         <>
-            <div className="container">
+            <div className="container shadow-sm p-3 bg-body rounded">
                 <div className="mb-3 mt-5 pt-4">
                     <h1 className="text-center">Loading Survey Report</h1>
                 </div>
@@ -149,10 +182,14 @@ export default function LoadingSurvey() {
                         <input type="date" className="form-control" name="loDate" value={formData.loDate} onChange={handleChange}/>
                     </div>
                     <div className="col-12">
-                        <select className="mb-3 form-select" aria-label="Tongkang" name="tongkang" value={formData.tongkang} onChange={handleChange}>
-                            <option value="SPOB Kujang Jaya 1">SPOB Kujang Jaya 1</option>
-                            <option value="SPOB Kanaya Indah 99">SPOB Kanaya Indah 99</option>
-                        </select>
+                        <Select
+                            placeholder= "Pilih Tongkang"
+                            name="tongkang_id"
+                            options={vesselOption}
+                            getOptionLabel={(option) => `${option.vessel_name}`}
+                            onChange={handleChangeVessel}
+                            className="mb-3"
+                        />
                     </div>
                     <div className="col-12">
                         <select className="mb-3 form-select" aria-label="BBM" name="bbm" value={formData.bbm} onChange={handleChange}>
@@ -197,7 +234,7 @@ export default function LoadingSurvey() {
                     </div>
                     <div className="col-12">
                         <label htmlFor="inputVolLo" className="form-label">Volume LO</label>
-                        <input type="text" className="form-control" name="loVol" value={formData.loVol} onChange={handleChange}/>
+                        <input type="text" className="form-control" name="loVol" value={formData.loVol} disabled/>
                     </div>
                     <div className="col-12">
                         <label htmlFor="inputVolAl" className="form-label">AL / Volume Tongkang</label>

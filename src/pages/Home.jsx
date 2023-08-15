@@ -1,44 +1,40 @@
 export default function Home() {
     return (
         <>
-            <div className="container">
-                <div className="row row-cols-1 row-cols-md-3 g-4 mt-5">
-                    <div className="col">
-                        <div className="card h-100">
-                        <img src="..." className="card-img-top" alt="..."></img>
-                        <div className="card-body">
-                            <h5 className="card-title">Card title</h5>
-                            <p className="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-                        </div>
+            <div className="container mt-5 pt-4">
+                <div className="row">
+                    <div className="col-md-3" style={{position: "relative"}}>
+                        <div className="card-counter primary">
+                            <i className="fa fa-ship"></i>
+                            <span className="count-numbers">12</span>
+                            <span className="count-name">Loadings</span>
                         </div>
                     </div>
-                    <div className="col">
-                        <div className="card h-100">
-                        <img src="..." className="card-img-top" alt="..."></img>
-                        <div className="card-body">
-                            <h5 className="card-title">Card title</h5>
-                            <p className="card-text">This is a short card.</p>
-                        </div>
-                        </div>
-                    </div>
-                    <div className="col">
-                        <div className="card h-100">
-                        <img src="..." className="card-img-top" alt="..."></img>
-                        <div className="card-body">
-                            <h5 className="card-title">Card title</h5>
-                            <p className="card-text">This is a longer card with supporting text below as a natural lead-in to additional content.</p>
-                        </div>
+
+                    <div className="col-md-3" style={{position: "relative"}}>
+                        <div className="card-counter danger">
+                            <i className="fa fa-anchor"></i>
+                            <span className="count-numbers">599</span>
+                            <span className="count-name">Bunker</span>
                         </div>
                     </div>
-                    <div className="col">
-                        <div className="card h-100">
-                        <img src="..." className="card-img-top" alt="..."></img>
-                        <div className="card-body">
-                            <h5 className="card-title">Card title</h5>
-                            <p className="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-                        </div>
+
+                    <div className="col-md-3" style={{position: "relative"}}>
+                        <div className="card-counter info">
+                            <i className="fa fa-oil-can"></i>
+                            <span className="count-numbers">1.150.000 L</span>
+                            <span className="count-name">Total LO</span>
                         </div>
                     </div>
+
+                    <div className="col-md-3" style={{position: "relative"}}>
+                        <div className="card-counter success">
+                            <i className="fa fa-gas-pump"></i>
+                            <span className="count-numbers">1.149.995 L</span>
+                            <span className="count-name">Total AR</span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         

@@ -35,8 +35,10 @@ export default function Login() {
         <>
             <div className="form-login">
             <form onSubmit={loginHandler}>
-                <img className="mb-4" src={SILogo} alt="" height="36" width="282"></img>
-                <h1 className="h3 mb-3 fw-normal">Please Login</h1>
+                <div className="text-center">
+                    <img className="mb-4" src={SILogo} alt="" height=   "36" width="282"></img>
+                </div>
+                <h1 className="h3 mb-3 fw-normal text-center">Please Login</h1>
 
                 <div className="form-floating">
                     <input type="email" className="form-control" name="email" onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com"></input>
@@ -53,8 +55,8 @@ export default function Login() {
                         Remember me
                     </label>
                 </div> */}
-                <button className="btn btn-primary w-100 py-2 my-3" type="submit">Sign in</button>
-                <p className="mt-5 mb-3 text-body-secondary">&copy; 2017-2023</p>
+                <button className="btn btn-primary w-100 py-2 my-3" type="submit">Login</button>
+                <p className="mt-5 mb-3 text-body-secondary text-center">2023 &copy; PT Surveyor Indonesia</p>
             </form>
             </div>
         

@@ -1,7 +1,7 @@
-import { useState } from "react"
-// import axios from "axios";
+import { useState, useEffect } from "react"
+import axios from "axios";
 import { useAuth } from "../context/Auth";
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
 
@@ -28,20 +28,29 @@ const datetimeNowID = (selector) => {
 
 export default function BunkerSurvey() {
     const { auth } = useAuth();
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
+    const [tongkangOption, setTongkangOption] = useState([]);
+    const [kriOption, setKriOption] = useState([]);
+    const [loNumberOption, setloNumberOption] = useState([]);
 
+    const headers = {
+        'Content-Type' : 'application/json',
+        'Accept' : 'application/json',
+        'Authorization' : 'Bearer ' + auth.data.token
+    }
 
+    const API_URL = "http://localhost:8000";
 
     const [formData, setFormData] = useState({
-        tongkang: "",
-        kri: "",
+        tongkang_id: 0,
+        kri_id: 0,
         bunker_location: "",
         bbm: "HSD",
         bunkerStartTime: datetimeNowID(1),
         bunkerStartDate: datetimeNowID(0),
         bunkerStopTime: datetimeNowID(1),
         bunkerStopDate: datetimeNowID(0),
-        lo_number: [],
+        lo_details: [],
         loVol: 0,
         arVol: 0,
         surveyor: auth.data.user.name
@@ -52,20 +61,108 @@ export default function BunkerSurvey() {
         setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
     };
 
-    const hanldeSubmit = async (event) => {
-        event.preventDefault();
-        console.log(formData);
+    const changeLoQtyType = (rows) => {
+        return rows.map(row => {
+            return {
+                id: row.value,
+                lo_number: row.lo_number,
+                qty: parseInt(row.qty)
+            }
+        })
     }
 
-    const loNumberOptions = [
-        { value: 1, lo_number: '8097469692', product: 'HSD', qty: 7000 },
-        { value: 2, lo_number: '8097469693', product: 'HSD', qty: 5000},
-        { value: 3, lo_number: '8097469694', product: 'HSD', qty: 10000 }
-    ]
+    const hanldeSubmit = async (event) => {
+        event.preventDefault();
+        const bunkerData = {
+            tongkang_id: formData.tongkang_id,
+            kri_id: formData.kri_id,
+            bunker_location: formData.bunker_location,
+            bbm: formData.bbm,
+            start: `${formData.bunkerStartDate} ${formData.bunkerStartTime}:00`,
+            stop: `${formData.bunkerStopDate} ${formData.bunkerStopTime}:00`,
+            lo_details: changeLoQtyType(formData.lo_details),
+            vol_lo: formData.loVol,
+            vol_ar: parseInt(formData.arVol),
+            // surveyor: auth.data.user.name
+        }
+        console.log(bunkerData);
+        navigate('/report', {state: {report: 1}});
+        // await axios.post(`${API_URL}/api/bunkers`, bunkerData, { headers: headers })
+        // .then(() => {
+        //     navigate('/report');
+        // })
+        // .catch((err) => {
+        //     console.error(err);
+        // })
+    }
+
+    // Vessel Select Option
+    const handleVesselList = async () => {
+        await axios.get(`${API_URL}/api/vessels/SPOB`, { headers: headers })
+        .then((res) => {
+            setTongkangOption(changeVesselOption(res.data.data))
+        })
+        .catch((err) => {
+            console.error(err);
+        })
+
+        await axios.get(`${API_URL}/api/vessels/KRI`, { headers: headers })
+        .then((res) => {
+            setKriOption(changeVesselOption(res.data.data))
+        })
+        .catch((err) => {
+            console.error(err);
+        })
+    }
+
+    const changeVesselOption = (rows) => {
+        return rows.map(row => {
+            return {
+                value: row.id,
+                vessel_name: row.vessel_name
+            }
+        })
+    }
+    const handleChangeTongkang = (selectedOption) => {
+        setFormData((prevFormData) => ({ 
+            ...prevFormData,
+            tongkang_id: selectedOption.value,
+        }));
+        handleLoNumberList(selectedOption.value)
+    };
+    const handleChangeKri = (selectedOption) => {
+        setFormData((prevFormData) => ({ 
+            ...prevFormData,
+            kri_id: selectedOption.value,
+        }));
+    };
+
+    // LO Select Option
+    const handleLoNumberList = async (tongkang_id) => {
+        await axios.get(`${API_URL}/api/lodetails/filter/${tongkang_id}`, { headers: headers })
+        .then((res) => {
+            setloNumberOption(changeLoNumberOption(res.data.data))
+        })
+        .catch((err) => {
+            console.error(err);
+        })
+    }
+
+    const changeLoNumberOption = (rows) => {
+        return rows.map(row => {
+            return {
+                value: row.id,
+                lo_number: row.lo_number,
+                product: row.product,
+                qty: row.qty
+            }
+        })
+    }
+
     const handleChangeLoNumber = (selectedOption) => {
         setFormData((prevFormData) => ({ 
             ...prevFormData,
-            lo_number: selectedOption, 
+            lo_details: selectedOption, 
             loVol: sumQty(selectedOption) 
         }));
     };
@@ -79,26 +176,36 @@ export default function BunkerSurvey() {
         }, 0)
     }
 
+    useEffect(() => {
+        handleVesselList()
+    }, []);
+
     return (
         <>
-            <div className="container">
+            <div className="container shadow-sm p-3 bg-body rounded">
                 <div className="mb-3 mt-5 pt-4">
                     <h1 className="text-center">Bunker Survey Report</h1>
                 </div>
                 <form className="row g-3" onSubmit={hanldeSubmit}>
                     <div className="col-12">
-                        <select className="mb-3 form-select" aria-label="Tongkang" name="tongkang" value={formData.tongkang} onChange={handleChange}>
-                            <option value="">Pilih Tongkang</option>
-                            <option value="SPOB Kujang Jaya 1">SPOB Kujang Jaya 1</option>
-                            <option value="SPOB Kanaya Indah 99">SPOB Kanaya Indah 99</option>
-                        </select>
+                        <Select
+                            placeholder= "Pilih Tongkang"
+                            name="tongkang_id"
+                            options={tongkangOption}
+                            getOptionLabel={(option) => `${option.vessel_name}`}
+                            onChange={handleChangeTongkang}
+                            className="mb-3"
+                        />
                     </div>
                     <div className="col-12">
-                        <select className="mb-3 form-select" aria-label="KRI" name="kri" value={formData.kri} onChange={handleChange}>
-                        <option value="">Pilih KRI</option>
-                            <option value="KRI Bung Tomo 357">KRI Bung Tomo 357</option>
-                            <option value="KRI John Lie 358">KRI Jhon Lie 358</option>
-                        </select>
+                        <Select
+                            placeholder= "Pilih KRI"
+                            name="kri_id"
+                            options={kriOption}
+                            getOptionLabel={(option) => `${option.vessel_name}`}
+                            onChange={handleChangeKri}
+                            className="mb-3"
+                        />
                     </div>
                     <div className="col-12">
                         <select className="mb-3 form-select" aria-label="Location"name="bunker_location" value={formData.bunker_location} onChange={handleChange}>
@@ -141,7 +248,7 @@ export default function BunkerSurvey() {
                             components={animatedComponents}
                             name="lo_number"
                             isMulti
-                            options={loNumberOptions}
+                            options={loNumberOption}
                             getOptionLabel={(option) => `${option.lo_number} : ${option.product} - ${option.qty} L`}
                             onChange={handleChangeLoNumber}
                             className="mb-3"
@@ -149,7 +256,7 @@ export default function BunkerSurvey() {
                     </div>
                     <div className="col-12">
                         <label htmlFor="inputVolLo" className="form-label">Volume LO</label>
-                        <input type="text" className="form-control" name="loVol" value={formData.loVol} onChange={handleChange}/>
+                        <input type="text" className="form-control" name="loVol" value={formData.loVol} disabled/>
                     </div>
                     <div className="col-12">
                         <label htmlFor="inputVolAr" className="form-label">AR / Volume KRI</label>
