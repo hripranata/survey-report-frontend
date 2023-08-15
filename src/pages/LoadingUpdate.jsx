@@ -2,6 +2,7 @@ import axios from "axios";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/Auth";
+import Select from 'react-select'
 
 function TableRows({rowsData, deleteTableRows, handleChange}) {
     return (
@@ -18,9 +19,30 @@ function TableRows({rowsData, deleteTableRows, handleChange}) {
     )
 }
 
+const datetimeNowID = (selector) => {
+    const now = new Date()
+    let datetime = now.toLocaleString('id-ID', {
+        hour12: false, 
+        hourCycle: 'h23',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    })
+    if (selector == 0) {
+        return datetime.split(', ')[0].split("/").reverse().join("-")
+    } else {
+        return datetime.split(', ')[1].substring(0,5).replace(".",":")
+    }
+}
+
 export default function LoadingUpdate() {
     const navigate = useNavigate();
     const { auth } = useAuth();
+    const [vesselOption, setVesselOption] = useState([]);
+
     const headers = {
         'Content-Type' : 'application/json',
         'Accept' : 'application/json',
@@ -35,34 +57,15 @@ export default function LoadingUpdate() {
         qty: 0,
     }]);
 
-    const datetimeNowID = (selector) => {
-        const now = new Date()
-        let datetime = now.toLocaleString('id-ID', {
-            hour12: false, 
-            hourCycle: 'h23',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-        })
-        if (selector == 0) {
-            return datetime.split(', ')[0].split("/").reverse().join("-")
-        } else {
-            return datetime.split(', ')[1].substring(0,5).replace(".",":")
-        }
-    }
-
     const [formData, setFormData] = useState({
         loDate: datetimeNowID(0),
-        tongkang: "SPOB Kujang Jaya 1",
+        tongkang_id: 0,
         bbm: "HSD",
         loadStartTime: datetimeNowID(1),
         loadStartDate: datetimeNowID(0),
         loadStopTime: datetimeNowID(1),
         loadStopDate: datetimeNowID(0),
-        lo_detail: [],
+        lo_details: [],
         loVol: 0,
         alVol: 0,
         surveyor: auth.data.user.name
@@ -77,11 +80,11 @@ export default function LoadingUpdate() {
             setFormData((prevFormData) => ({ 
                 ...prevFormData, 
                 loDate: loadingById.lo_date,
-                tongkang: loadingById.tongkang,
+                tongkang_id: loadingById.tongkang.id,
                 bbm: loadingById.bbm,
-                loadStartTime: loadingById.start.split(' ')[1],
+                loadStartTime: loadingById.start.split(' ')[1].substring(0,5),
                 loadStartDate: loadingById.start.split(' ')[0],
-                loadStopTime: loadingById.stop.split(' ')[1],
+                loadStopTime: loadingById.stop.split(' ')[1].substring(0,5),
                 loadStopDate: loadingById.stop.split(' ')[0],
                 lo_details: loadingById.lo_details,
                 loVol: loadingById.vol_lo,
@@ -148,10 +151,10 @@ export default function LoadingUpdate() {
 
         const loadingData = {
             lo_date: formData.loDate,
-            tongkang: formData.tongkang,
+            tongkang_id: formData.tongkang_id,
             bbm: formData.bbm,
-            start: `${formData.loadStartDate} ${formData.loadStartTime}`,
-            stop: `${formData.loadStopDate} ${formData.loadStopTime}`,
+            start: `${formData.loadStartDate} ${formData.loadStartTime}:00`,
+            stop: `${formData.loadStopDate} ${formData.loadStopTime}:00`,
             lo_details: changeLoQtyType(formData.lo_details),
             vol_lo: formData.loVol,
             vol_al: parseInt(formData.alVol),
@@ -167,10 +170,41 @@ export default function LoadingUpdate() {
         })
     }
 
+    // Vessel select option
+    const handleTongkangList = async () => {
+        await axios.get(`${API_URL}/api/vessels/SPOB`, { headers: headers })
+        .then((res) => {
+            setVesselOption(changeSelectOption(res.data.data))
+        })
+        .catch((err) => {
+            console.error(err);
+        })
+    }
+
+    const changeSelectOption = (rows) => {
+        return rows.map(row => {
+            return {
+                value: row.id,
+                vessel_name: row.vessel_name
+            }
+        })
+    }
+
+    const handleChangeVessel = (selectedOption) => {
+        setFormData((prevFormData) => ({ 
+            ...prevFormData,
+            tongkang_id: selectedOption.value, 
+        }));
+    };
+
+    const vessel_initial_option = () => {
+        return vesselOption.filter((vsl) => vsl.value == formData.tongkang_id)
+    }
+
     useEffect(() => {
         fetchLoadingById()
+        handleTongkangList()
     }, []);
-
     return(
         <>
         <div className="container">
@@ -183,10 +217,15 @@ export default function LoadingUpdate() {
                     <input type="date" className="form-control" name="loDate" value={formData.loDate} onChange={handleChange}></input>
                 </div>
                 <div className="col-12">
-                    <select className="mb-3 form-select" aria-label="Tongkang" name="tongkang" value={formData.tongkang} onChange={handleChange}>
-                        <option value="SPOB Kujang Jaya 1">SPOB Kujang Jaya 1</option>
-                        <option value="SPOB Kanaya Indah 99">SPOB Kanaya Indah 99</option>
-                    </select>
+                        <Select
+                            placeholder= "Pilih Tongkang"
+                            name="tongkang_id"
+                            value={vessel_initial_option()}
+                            options={vesselOption}
+                            getOptionLabel={(option) => `${option.vessel_name}`}
+                            onChange={handleChangeVessel}
+                            className="mb-3"
+                        />
                 </div>
                 <div className="col-12">
                     <select className="mb-3 form-select" aria-label="BBM" name="bbm" value={formData.bbm} onChange={handleChange}>
@@ -231,7 +270,7 @@ export default function LoadingUpdate() {
                 </div>
                 <div className="col-12">
                     <label htmlFor="inputVolLo" className="form-label">Volume LO</label>
-                    <input type="text" className="form-control" name="loVol" value={formData.loVol} onChange={handleChange}></input>
+                    <input type="text" className="form-control" name="loVol" value={formData.loVol} disabled></input>
                 </div>
                 <div className="col-12">
                     <label htmlFor="inputVolAl" className="form-label">AL / Volume Tongkang</label>

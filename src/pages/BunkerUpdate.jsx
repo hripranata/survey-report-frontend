@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import axios from "axios";
 import { useAuth } from "../context/Auth";
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
 import CreatableSelect from 'react-select/creatable';
@@ -27,12 +27,13 @@ const datetimeNowID = (selector) => {
     }
 }
 
-export default function BunkerSurvey() {
+export default function BunkerUpdate() {
     const { auth } = useAuth();
     const navigate = useNavigate();
     const [tongkangOption, setTongkangOption] = useState([]);
     const [kriOption, setKriOption] = useState([]);
     const [loNumberOption, setloNumberOption] = useState([]);
+    const [loNumberNewOption, setloNumberNewOption] = useState([]);
 
     const headers = {
         'Content-Type' : 'application/json',
@@ -41,6 +42,8 @@ export default function BunkerSurvey() {
     }
 
     const API_URL = "http://localhost:8000";
+
+    const { id } = useParams();
 
     const [formData, setFormData] = useState({
         tongkang_id: 0,
@@ -57,15 +60,43 @@ export default function BunkerSurvey() {
         surveyor: auth.data.user.name
     })
 
+    const fetchBunkerById = async () => {
+        await axios.get(`${API_URL}/api/bunkers/${id}`, {
+            headers: headers
+        })
+        .then((res) => {
+            const bunkerById = res.data.data;
+            setFormData((prevFormData) => ({ 
+                ...prevFormData, 
+                tongkang_id: bunkerById.tongkang.id,
+                kri_id: bunkerById.kri.id,
+                bunker_location: bunkerById.bunker_location,
+                bbm: bunkerById.bbm,
+                bunkerStartTime: bunkerById.start.split(' ')[1].substring(0,5),
+                bunkerStartDate: bunkerById.start.split(' ')[0],
+                bunkerStopTime: bunkerById.stop.split(' ')[1].substring(0,5),
+                bunkerStopDate: bunkerById.stop.split(' ')[0],
+                lo_details: bunkerById.lo_details,
+                loVol: bunkerById.vol_lo,
+                arVol: bunkerById.vol_ar,
+            }));
+            setloNumberOption(changeLoNumberOption(bunkerById.lo_details))
+            handleLoNumberList(bunkerById.tongkang.id)
+        })
+        .catch((err) => {
+            console.error(err);
+        })
+    }
+
     const handleChange = (event) => {
         const { name, value } = event.target;
         setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
     };
 
-    const changeLoQtyType = (rows) => {
+    const changeLoId = (rows) => {
         return rows.map(row => {
             return {
-                id: row.value,
+                id: row.id? row.id : row.value,
                 lo_number: row.lo_number,
                 qty: parseInt(row.qty)
             }
@@ -81,13 +112,13 @@ export default function BunkerSurvey() {
             bbm: formData.bbm,
             start: `${formData.bunkerStartDate} ${formData.bunkerStartTime}:00`,
             stop: `${formData.bunkerStopDate} ${formData.bunkerStopTime}:00`,
-            lo_details: changeLoQtyType(formData.lo_details),
+            lo_details: changeLoId(formData.lo_details),
             vol_lo: formData.loVol,
             vol_ar: parseInt(formData.arVol),
             // surveyor: auth.data.user.name
         }
         
-        await axios.post(`${API_URL}/api/bunkers`, bunkerData, { headers: headers })
+        await axios.put(`${API_URL}/api/bunkers/${id}`, bunkerData, { headers: headers })
         .then(() => {
             navigate('/report', {state: {report: 1}});
         })
@@ -139,9 +170,9 @@ export default function BunkerSurvey() {
 
     // LO Select Option
     const handleLoNumberList = async (tongkang_id) => {
-        await axios.get(`${API_URL}/api/lodetails/filter/${tongkang_id}`, { headers: headers })
+        return await axios.get(`${API_URL}/api/lodetails/filter/${tongkang_id}`, { headers: headers })
         .then((res) => {
-            setloNumberOption(changeLoNumberOption(res.data.data))
+            setloNumberNewOption(changeLoNumberOption(res.data.data))
         })
         .catch((err) => {
             console.error(err);
@@ -165,6 +196,7 @@ export default function BunkerSurvey() {
             lo_details: selectedOption, 
             loVol: sumQty(selectedOption) 
         }));
+        setloNumberOption(selectedOption)
     };
 
     const sumQty = (rows) => {
@@ -189,21 +221,32 @@ export default function BunkerSurvey() {
         }));
     };
 
+    const tongkang_initial_option = () => {
+        return tongkangOption.filter((tk) => tk.value == formData.tongkang_id)
+    }
+    const kri_initial_option = () => {
+        return kriOption.filter((kri) => kri.value == formData.kri_id)
+    }
+    const location_initial_option = () => {
+        return bunkerLocationOptions.filter((lct) => lct.value == formData.bunker_location)
+    }
+
     useEffect(() => {
+        fetchBunkerById()
         handleVesselList()
     }, []);
-
     return (
         <>
             <div className="container shadow-sm p-3 bg-body rounded">
                 <div className="mb-3 mt-5 pt-4">
-                    <h1 className="text-center">Bunker Survey Report</h1>
+                    <h1 className="text-center">Bunker Survey Update</h1>
                 </div>
                 <form className="row g-3" onSubmit={hanldeSubmit}>
                     <div className="col-12">
                         <Select
                             placeholder= "Pilih Tongkang"
                             name="tongkang_id"
+                            value={tongkang_initial_option()}
                             options={tongkangOption}
                             getOptionLabel={(option) => `${option.vessel_name}`}
                             onChange={handleChangeTongkang}
@@ -214,6 +257,7 @@ export default function BunkerSurvey() {
                         <Select
                             placeholder= "Pilih KRI"
                             name="kri_id"
+                            value={kri_initial_option()}
                             options={kriOption}
                             getOptionLabel={(option) => `${option.vessel_name}`}
                             onChange={handleChangeKri}
@@ -223,6 +267,7 @@ export default function BunkerSurvey() {
                     <div className="col-12 mb-3">
                         <CreatableSelect 
                             isClearable
+                            value={location_initial_option()}
                             placeholder= "Pilih Lokasi Bunker"
                             name="bunker_location"
                             options={bunkerLocationOptions}
@@ -263,7 +308,8 @@ export default function BunkerSurvey() {
                             components={animatedComponents}
                             name="lo_number"
                             isMulti
-                            options={loNumberOption}
+                            value={loNumberOption}
+                            options={loNumberNewOption}
                             getOptionLabel={(option) => `${option.lo_number} : ${option.product} - ${option.qty} L`}
                             onChange={handleChangeLoNumber}
                             className="mb-3"
@@ -289,5 +335,5 @@ export default function BunkerSurvey() {
                 </form>
             </div>
         </>
-    )
+    );
 }

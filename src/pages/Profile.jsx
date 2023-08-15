@@ -25,6 +25,10 @@ export default function Profile() {
                                         <input type="text" className="form-control" id="inputName"></input>
                                     </div>
                                     <div className="mb-3">
+                                        <label htmlFor="inputEmail" className="form-label">NIK</label>
+                                        <input type="text" className="form-control" id="inputNik"></input>
+                                    </div>
+                                    <div className="mb-3">
                                         <label htmlFor="inputEmail" className="form-label">Email Address</label>
                                         <input type="text" className="form-control" id="inputEmail"></input>
                                     </div>

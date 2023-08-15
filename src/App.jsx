@@ -11,6 +11,7 @@ import { RequireAuth } from './context/Auth'
 import Layout from './components/Layout';
 import { useEffect } from 'react'
 import LoadingUpdate from './pages/LoadingUpdate'
+import BunkerUpdate from './pages/BunkerUpdate'
 
 function App() {
   useEffect(() => {
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/home" element={<Home />} />
                 <Route path="/loadingsurvey" element={<LoadingSurvey />} />
                 <Route path="/loading/edit/:id" element={<LoadingUpdate />} />
+                <Route path="/bunker/edit/:id" element={<BunkerUpdate />} />
                 <Route path="/bunkersurvey" element={<BunkerSurvey />} />
                 <Route path="/report" element={<Report />} />
                 <Route path="/profile" element={<Profile />} />

@@ -121,7 +121,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   position: absolute;
   right: 35px;
   top: 65px;
-  font-style: italic;
+  /* font-style: italic; */
   text-transform: capitalize;
   opacity: 0.5;
   display: block;

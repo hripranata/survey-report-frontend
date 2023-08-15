@@ -26,7 +26,7 @@ export default function Navbar() {
         <>
             <nav className="navbar fixed-top navbar-expand-lg shadow-sm bg-body">
                 <div className="container-fluid">
-                    <Link to="/home" className="navbar-brand" onClick={() => handleNavCollapse()}>
+                    <Link to="/home" className="navbar-brand">
                         <img src={SILogo} alt="" height="36" width="282"></img>
                     </Link>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onClick={() => handleNavCollapse()}>
@@ -52,7 +52,7 @@ export default function Navbar() {
                             <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 {auth?.data?.user?.name}
                             </a>
-                            <ul className="dropdown-menu dropdown-menu-end">
+                            <ul className="dropdown-menu dropdown-menu-end" onClick={() => handleNavCollapse()}>
                                 <li className="dropdown-item">
                                     <NavLink to="/profile" className="nav-link"><i className="fa fa-user"></i> Profile</NavLink>
                                 </li>
