@@ -5,6 +5,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
 import CreatableSelect from 'react-select/creatable';
+import Swal from 'sweetalert2'
+import TopLoadingBar from "../components/TopLoadingBar";
 
 const animatedComponents = makeAnimated();
 
@@ -28,12 +30,24 @@ const datetimeNowID = (selector) => {
 }
 
 export default function BunkerUpdate() {
-    const { auth } = useAuth();
+    const { auth, setProgress } = useAuth();
     const navigate = useNavigate();
     const [tongkangOption, setTongkangOption] = useState([]);
     const [kriOption, setKriOption] = useState([]);
     const [loNumberOption, setloNumberOption] = useState([]);
     const [loNumberNewOption, setloNumberNewOption] = useState([]);
+
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'bottom-end',
+        iconColor: 'white',
+        customClass: {
+          popup: 'colored-toast'
+        },
+        showConfirmButton: false,
+        timer: 1250,
+        timerProgressBar: true
+    })
 
     const headers = {
         'Content-Type' : 'application/json',
@@ -80,8 +94,8 @@ export default function BunkerUpdate() {
                 loVol: bunkerById.vol_lo,
                 arVol: bunkerById.vol_ar,
             }));
-            setloNumberOption(changeLoNumberOption(bunkerById.lo_details))
-            handleLoNumberList(bunkerById.tongkang.id)
+            setloNumberOption(changeLoValue(bunkerById.lo_details),)
+            handleLoNumberList(bunkerById.tongkang.id, bunkerById.lo_details)
         })
         .catch((err) => {
             console.error(err);
@@ -98,6 +112,7 @@ export default function BunkerUpdate() {
             return {
                 id: row.id? row.id : row.value,
                 lo_number: row.lo_number,
+                product: row.product,
                 qty: parseInt(row.qty)
             }
         })
@@ -120,10 +135,18 @@ export default function BunkerUpdate() {
         
         await axios.put(`${API_URL}/api/bunkers/${id}`, bunkerData, { headers: headers })
         .then(() => {
+            Toast.fire({
+                icon: 'success',
+                title: 'Data successfully saved!'
+              })
             navigate('/report', {state: {report: 1}});
         })
         .catch((err) => {
             console.error(err);
+            Toast.fire({
+                icon: 'error',
+                title: 'Error saving data!'
+              })
         })
     }
 
@@ -159,8 +182,11 @@ export default function BunkerUpdate() {
             ...prevFormData,
             tongkang_id: selectedOption.value,
         }));
-        handleLoNumberList(selectedOption.value)
+        console.log(formData.tongkang_id);
+        console.log(selectedOption.value);
+        handleLoNumberList(selectedOption.value, changeLoId(loNumberOption))
     };
+
     const handleChangeKri = (selectedOption) => {
         setFormData((prevFormData) => ({ 
             ...prevFormData,
@@ -169,17 +195,19 @@ export default function BunkerUpdate() {
     };
 
     // LO Select Option
-    const handleLoNumberList = async (tongkang_id) => {
+    const handleLoNumberList = async (tongkang_id, old_lo) => {
         return await axios.get(`${API_URL}/api/lodetails/filter/${tongkang_id}`, { headers: headers })
         .then((res) => {
-            setloNumberNewOption(changeLoNumberOption(res.data.data))
+            const new_lo = changeLoValue(res.data.data);
+            const old_loNumber = changeLoValue(old_lo);
+            setloNumberNewOption([...new_lo, ...old_loNumber])
         })
         .catch((err) => {
             console.error(err);
         })
     }
 
-    const changeLoNumberOption = (rows) => {
+    const changeLoValue = (rows) => {
         return rows.map(row => {
             return {
                 value: row.id,
@@ -234,9 +262,11 @@ export default function BunkerUpdate() {
     useEffect(() => {
         fetchBunkerById()
         handleVesselList()
+        setProgress(100)
     }, []);
     return (
         <>
+            <TopLoadingBar/>
             <div className="container shadow-sm p-3 bg-body rounded">
                 <div className="mb-3 mt-5 pt-4">
                     <h1 className="text-center">Bunker Survey Update</h1>
@@ -309,7 +339,7 @@ export default function BunkerUpdate() {
                             name="lo_number"
                             isMulti
                             value={loNumberOption}
-                            options={loNumberNewOption}
+                            options={[...loNumberNewOption, ...loNumberOption]}
                             getOptionLabel={(option) => `${option.lo_number} : ${option.product} - ${option.qty} L`}
                             onChange={handleChangeLoNumber}
                             className="mb-3"

@@ -61,13 +61,12 @@ export default function Profile() {
 
     const hanldeSubmit = async (event) => {
         event.preventDefault();
-        console.log(user);
     
         await axios.put(`${API_URL}/api/users/${auth.data.user.id}`, user, { headers: headers })
         .then(() => {
             Toast.fire({
                 icon: 'success',
-                title: 'Success updating data!'
+                title: 'Data successfully saved!'
               })
             navigate('/profile');
         })

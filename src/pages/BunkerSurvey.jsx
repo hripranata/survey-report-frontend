@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
 import CreatableSelect from 'react-select/creatable';
+import Swal from 'sweetalert2'
+import TopLoadingBar from "../components/TopLoadingBar";
 
 const animatedComponents = makeAnimated();
 
@@ -28,11 +30,23 @@ const datetimeNowID = (selector) => {
 }
 
 export default function BunkerSurvey() {
-    const { auth } = useAuth();
+    const { auth, setProgress } = useAuth();
     const navigate = useNavigate();
     const [tongkangOption, setTongkangOption] = useState([]);
     const [kriOption, setKriOption] = useState([]);
     const [loNumberOption, setloNumberOption] = useState([]);
+
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'bottom-end',
+        iconColor: 'white',
+        customClass: {
+          popup: 'colored-toast'
+        },
+        showConfirmButton: false,
+        timer: 1250,
+        timerProgressBar: true
+    })
 
     const headers = {
         'Content-Type' : 'application/json',
@@ -89,10 +103,18 @@ export default function BunkerSurvey() {
         
         await axios.post(`${API_URL}/api/bunkers`, bunkerData, { headers: headers })
         .then(() => {
+            Toast.fire({
+                icon: 'success',
+                title: 'Data successfully saved!'
+              })
             navigate('/report', {state: {report: 1}});
         })
         .catch((err) => {
             console.error(err);
+            Toast.fire({
+                icon: 'error',
+                title: 'Error saving data!'
+              })
         })
     }
 
@@ -191,10 +213,12 @@ export default function BunkerSurvey() {
 
     useEffect(() => {
         handleVesselList()
+        setProgress(100)
     }, []);
 
     return (
         <>
+            <TopLoadingBar/>
             <div className="container shadow-sm p-3 bg-body rounded">
                 <div className="mb-3 mt-5 pt-4">
                     <h1 className="text-center">Bunker Survey Report</h1>

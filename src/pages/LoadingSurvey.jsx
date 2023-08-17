@@ -150,7 +150,7 @@ export default function LoadingSurvey() {
         .then(() => {
             Toast.fire({
                 icon: 'success',
-                title: 'Success saving data!'
+                title: 'Data successfully saved!'
               })
             navigate('/report');
         })

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/Auth";
 import Select from 'react-select'
 import Swal from 'sweetalert2'
+import TopLoadingBar from "../components/TopLoadingBar";
 
 function TableRows({rowsData, deleteTableRows, handleChange}) {
     return (
@@ -41,7 +42,7 @@ const datetimeNowID = (selector) => {
 
 export default function LoadingUpdate() {
     const navigate = useNavigate();
-    const { auth } = useAuth();
+    const { auth, setProgress } = useAuth();
     const [vesselOption, setVesselOption] = useState([]);
 
     const Toast = Swal.mixin({
@@ -178,7 +179,7 @@ export default function LoadingUpdate() {
         .then(() => {
             Toast.fire({
                 icon: 'success',
-                title: 'Success updating data!'
+                title: 'Data successfully saved!'
               })
             navigate('/report');
         })
@@ -225,9 +226,11 @@ export default function LoadingUpdate() {
     useEffect(() => {
         fetchLoadingById()
         handleTongkangList()
+        setProgress(100)
     }, []);
     return(
         <>
+        <TopLoadingBar/>
         <div className="container">
             <div className="mb-3 mt-5 pt-4">
                 <h1 className="text-center">Update Loading Report</h1>

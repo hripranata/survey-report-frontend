@@ -7,7 +7,7 @@ export default function TopLoadingBar() {
     return (
         <LoadingBar
             color='#007bff'
-            height={2}
+            height={2.5}
             progress={progress}
             onLoaderFinished={() => setProgress(0)}
         />
