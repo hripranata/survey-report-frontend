@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/Auth";
 import Select from 'react-select'
+import Swal from 'sweetalert2'
 
 function TableRows({rowsData, deleteTableRows, handleChange}) {
     return (
@@ -42,6 +43,18 @@ export default function LoadingUpdate() {
     const navigate = useNavigate();
     const { auth } = useAuth();
     const [vesselOption, setVesselOption] = useState([]);
+
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'bottom-end',
+        iconColor: 'white',
+        customClass: {
+          popup: 'colored-toast'
+        },
+        showConfirmButton: false,
+        timer: 1250,
+        timerProgressBar: true
+    })
 
     const headers = {
         'Content-Type' : 'application/json',
@@ -163,10 +176,18 @@ export default function LoadingUpdate() {
     
         await axios.put(`${API_URL}/api/loadings/${id}`, loadingData, { headers: headers })
         .then(() => {
+            Toast.fire({
+                icon: 'success',
+                title: 'Success updating data!'
+              })
             navigate('/report');
         })
         .catch((err) => {
             console.error(err);
+            Toast.fire({
+                icon: 'error',
+                title: 'Error saving data!'
+              })
         })
     }
 

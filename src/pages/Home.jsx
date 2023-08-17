@@ -1,6 +1,15 @@
+import { useEffect } from 'react'
+import TopLoadingBar from "../components/TopLoadingBar";
+import { useAuth } from "../context/Auth";
+
 export default function Home() {
+    const { setProgress } = useAuth();
+    useEffect(() => {
+        setProgress(100)
+    }, []);
     return (
         <>
+            <TopLoadingBar/>
             <div className="container mt-5 pt-4">
                 <div className="row">
                     <div className="col-md-3" style={{position: "relative"}}>

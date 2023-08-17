@@ -3,6 +3,8 @@ import axios from "axios";
 import { useAuth } from "../context/Auth";
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select'
+import Swal from 'sweetalert2'
+import TopLoadingBar from "../components/TopLoadingBar";
 
 function TableRows({rowsData, deleteTableRows, handleChange}) {
     return (
@@ -39,13 +41,25 @@ const datetimeNowID = (selector) => {
 }
 
 export default function LoadingSurvey() {
-    const { auth } = useAuth();
+    const { auth, setProgress } = useAuth();
     const navigate = useNavigate();
     const [vesselOption, setVesselOption] = useState([]);
     const [rowsData, setRowsData] = useState([{
         lo_number: "",
         qty: 0,
     }]);
+
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'bottom-end',
+        iconColor: 'white',
+        customClass: {
+          popup: 'colored-toast'
+        },
+        showConfirmButton: false,
+        timer: 1250,
+        timerProgressBar: true
+    })
 
     const headers = {
         'Content-Type' : 'application/json',
@@ -134,10 +148,18 @@ export default function LoadingSurvey() {
     
         await axios.post(`${API_URL}/api/loadings`, loadingData, { headers: headers })
         .then(() => {
+            Toast.fire({
+                icon: 'success',
+                title: 'Success saving data!'
+              })
             navigate('/report');
         })
         .catch((err) => {
             console.error(err);
+            Toast.fire({
+                icon: 'error',
+                title: 'Error saving data!'
+              })
         })
     }
 
@@ -169,9 +191,11 @@ export default function LoadingSurvey() {
 
     useEffect(() => {
         handleTongkangList()
+        setProgress(100)
     }, []);
     return (
         <>
+            <TopLoadingBar/>
             <div className="container shadow-sm p-3 bg-body rounded">
                 <div className="mb-3 mt-5 pt-4">
                     <h1 className="text-center">Loading Survey Report</h1>

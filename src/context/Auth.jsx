@@ -34,8 +34,9 @@ export const useLocalStorage = (keyName, defaultValue) => {
 
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useLocalStorage('user', null);
+  const [progress, setProgress] = useState(0)
   return (
-    <AuthContext.Provider value={{auth, setAuth}}>
+    <AuthContext.Provider value={{auth, setAuth, progress, setProgress}}>
       {children}
     </AuthContext.Provider>
   );
@@ -54,7 +55,6 @@ export const RequireAuth = () => {
     );
   }
 
-  // return <Outlet />;
   return (
     <div>
         <Navbar />

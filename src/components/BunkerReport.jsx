@@ -95,7 +95,7 @@ export default function BunkerReport() {
                 </div>
                 <div className="mt-3 table-responsive">
                     <table className="table table-bordered table-striped text-center">
-                        <thead>
+                        <thead className="table-primary">
                             <tr>
                                 <th scope="col">No</th>
                                 <th scope="col">Port</th>

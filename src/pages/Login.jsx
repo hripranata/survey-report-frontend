@@ -3,34 +3,56 @@ import { useState } from "react"
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/Auth";
+import Swal from 'sweetalert2'
 
 export default function Login() {
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const { setAuth } = useAuth();
     const navigate = useNavigate();
 
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'bottom-end',
+        iconColor: 'white',
+        customClass: {
+          popup: 'colored-toast'
+        },
+        showConfirmButton: false,
+        timer: 1250,
+        timerProgressBar: true
+    })
+
+
     const loginHandler = (ev) => {
         ev.preventDefault();
         const API_URL = "http://localhost:8000";
-        if (email.length > 0 && password.length > 0) {
+        if (username.length > 0 && password.length > 0) {
             axios.get(API_URL + "/sanctum/csrf-cookie").then(() => {
                 axios
                     .post(API_URL + "/api/login", {
-                        email: email,
+                        username: username,
                         password: password,
                     })
                     .then((response) => {
                          localStorage.setItem('user', JSON.stringify(response.data))
                          setAuth(response.data)
+                         Toast.fire({
+                            icon: 'success',
+                            title: 'Success Login'
+                            })
                          navigate("/home")
                     })
-                    .catch(function (error) {
-                        console.error(error);
+                    .catch(function () {
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Username or Password are not match !'
+                          })
                     });
             });
         }
     };
+
     return (
         <>
             <div className="form-login">
@@ -38,26 +60,19 @@ export default function Login() {
                 <div className="text-center">
                     <img className="mb-4" src={SILogo} alt="" height=   "36" width="282"></img>
                 </div>
-                <h1 className="h3 mb-3 fw-normal text-center">Please Login</h1>
+                <h1 className="h3 mb-3 fw-normal text-center">Bunker Report</h1>
 
                 <div className="form-floating">
-                    <input type="email" className="form-control" name="email" onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com"></input>
-                    <label htmlFor="floatingInput">Email address</label>
+                    <input type="text" className="form-control" name="username" onChange={(e) => setUsername(e.target.value)} placeholder="NIK" required></input>
+                    <label htmlFor="floatingInput">NIK</label>
                 </div>
                 <div className="form-floating">
-                    <input type="password" className="form-control" name="password" onChange={(e) => setPassword(e.target.value)} placeholder="Password"></input>
+                    <input type="password" className="form-control" name="password" onChange={(e) => setPassword(e.target.value)} placeholder="Password" required></input>
                     <label htmlFor="floatingPassword">Password</label>
                 </div>
-
-                {/* <div className="form-check text-start my-3">
-                    <input className="form-check-input" type="checkbox" value="remember-me" id="flexCheckDefault"></input>
-                    <label className="form-check-label" htmlFor="flexCheckDefault">
-                        Remember me
-                    </label>
-                </div> */}
                 <button className="btn btn-primary w-100 py-2 my-3" type="submit">Login</button>
-                <p className="mt-5 mb-3 text-body-secondary text-center">2023 &copy; PT Surveyor Indonesia</p>
             </form>
+            <p className="mt-5 mb-3 text-body-secondary text-center">2023 &copy; PT Surveyor Indonesia</p>
             </div>
         
         </>

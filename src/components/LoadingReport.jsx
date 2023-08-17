@@ -1,10 +1,12 @@
 import axios from "axios";
 import { useAuth } from "../context/Auth";
 import { useState, useEffect } from "react";
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2'
 
 export default function LoadingReport() {
     const { auth } = useAuth();
+    const navigate = useNavigate();
     const [loadings, setLoadings] = useState([])
     const [loDetail, setLoDetail] = useState([])
     const [editReport, setEditReport] = useState(false)
@@ -12,6 +14,18 @@ export default function LoadingReport() {
     const now = new Date()
 
     const [month, setMonth] = useState(now.getMonth()+1)
+
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'bottom-end',
+        iconColor: 'white',
+        customClass: {
+          popup: 'colored-toast'
+        },
+        showConfirmButton: false,
+        timer: 1250,
+        timerProgressBar: true
+    })
 
     const headers = {
         'Content-Type' : 'application/json',
@@ -65,6 +79,53 @@ export default function LoadingReport() {
         .catch((err) => {
             console.error(err);
         })
+    }
+
+    const handleEditButton = (id) => {
+        Swal.fire({
+            title: 'Do you want to edit the data?',
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: 'Yes',
+            denyButtonText: 'No',
+            allowOutsideClick: false,
+            customClass: {
+              actions: 'my-actions',
+              cancelButton: 'order-1 right-gap',
+              confirmButton: 'order-2',
+              denyButton: 'order-3',
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+                navigate(`/loading/edit/${id}`);
+            }
+          })
+    }
+
+    const handleDeleteButton = (id) => {
+        Swal.fire({
+            title: 'Do you want to delete the data?',
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: 'Yes',
+            denyButtonText: 'No',
+            allowOutsideClick: false,
+            customClass: {
+              actions: 'my-actions',
+              cancelButton: 'order-1 right-gap',
+              confirmButton: 'order-2',
+              denyButton: 'order-3',
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+                handleDeleteLoading(id)
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Success updating data!'
+                  })
+            }
+          })
+          
     }
 
     useEffect(() => {
@@ -127,10 +188,11 @@ export default function LoadingReport() {
                                 <td>{ loading.vol_al }</td>
                                 <td>{ loading.surveyor }</td>
                                 <td style={editReport? {} : {display: "none"} }>
-                                    <Link to={`/loading/edit/${loading.id}`} className="btn btn-outline-warning btn-sm"><i className="fa fa-pen"></i></Link>
+                                    {/* <Link to={`/loading/edit/${loading.id}`} className="btn btn-outline-warning btn-sm" onClick={()=>handleEditButton(loading.id)}><i className="fa fa-pen"></i></Link> */}
+                                    <button type="button" className="btn btn-outline-warning btn-sm" onClick={()=>handleEditButton(loading.id)}><i className="fa fa-pen"></i></button>
                                 </td>
 
-                                <td style={editReport? {} : {display: "none"} }><button type="button" className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteLoading(loading.id)}><i className="fa fa-trash"></i></button></td>
+                                <td style={editReport? {} : {display: "none"} }><button type="button" className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteButton(loading.id)}><i className="fa fa-trash"></i></button></td>
                             </tr>
                             ))
                         :   <tr>

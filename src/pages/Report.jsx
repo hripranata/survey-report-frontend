@@ -2,6 +2,8 @@ import { useState, useEffect } from "react"
 import { useLocation } from 'react-router-dom'
 import LoadingReport from "../components/LoadingReport";
 import BunkerReport from "../components/BunkerReport";
+import TopLoadingBar from "../components/TopLoadingBar";
+import { useAuth } from "../context/Auth";
 
 export default function Report() {
     const [currentReport, setCurrentReport] = useState(0)
@@ -15,11 +17,14 @@ export default function Report() {
         }
     }
 
+    const { setProgress } = useAuth();
     useEffect(() => {
         handleCurrentView()
+        setProgress(100)
     }, []);
     return (
         <>
+            <TopLoadingBar/>
             <div className="container shadow-sm p-3 bg-body rounded">
                 <nav className="mt-5 pt-4">
                     <div className="nav nav-tabs" id="nav-tab" role="tablist">
