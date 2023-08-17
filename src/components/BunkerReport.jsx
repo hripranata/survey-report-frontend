@@ -192,7 +192,7 @@ export default function BunkerReport() {
                                 </tr>
                             ))}
                                 <tr>
-                                    <td colSpan="2">Total</td>
+                                    <td colSpan="2" className="text-end">Total</td>
                                     <td>{loDetail.vol_lo}</td>
                                 </tr>
                             </tbody>

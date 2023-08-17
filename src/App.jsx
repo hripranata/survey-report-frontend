@@ -13,6 +13,12 @@ import Unauthorized from './pages/Unauthorized'
 import Layout from './components/Layout';
 import LoadingUpdate from './pages/LoadingUpdate'
 import BunkerUpdate from './pages/BunkerUpdate'
+import UserManagement from './pages/UserManagement'
+
+const ROLES = {
+  'User': 'user',
+  'Admin': 'admin'
+}
 
 function App() {
   const [progress, setProgress] = useState(0)
@@ -31,7 +37,7 @@ function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Navigate to="/login" />} />
-              <Route element={< RequireAuth />}>
+              <Route element={< RequireAuth allowedRoles={[ROLES.User, ROLES.Admin]} />}>
                   <Route path="/home" element={<Home />} />
                   <Route path="/loadingsurvey" element={<LoadingSurvey />} />
                   <Route path="/loading/edit/:id" element={<LoadingUpdate />} />
@@ -39,6 +45,9 @@ function App() {
                   <Route path="/bunkersurvey" element={<BunkerSurvey />} />
                   <Route path="/report" element={<Report />} />
                   <Route path="/profile" element={<Profile />} />
+              </Route>
+              <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
+                  <Route path="/usermanagement" element={<UserManagement />} />
               </Route>
               <Route path="/login" element={<Login />} />
               <Route path="/unauthorized" element={<Unauthorized />} />

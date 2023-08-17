@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const RequireAuth = () => {
+export const RequireAuth = ({ allowedRoles }) => {
   const { auth } = useAuth();
   const location = useLocation();
 
@@ -59,7 +59,14 @@ export const RequireAuth = () => {
     <div>
         <Navbar />
         <div className="content-wrap">
-            <Outlet />
+            {/* <Outlet /> */}
+            {/* { auth?.data?.user?.role.find(role => allowedRoles?.includes(role)) */}
+            { allowedRoles.find(role => auth?.data?.user?.role === role)
+              ? <Outlet />
+              : auth?.data?.user
+              ? <Navigate to="/unauthorized" state={{ from: location }} replace />
+              : <Navigate to="/login" state={{ from: location }} replace />
+            }
         </div>
         <Footer />
     </div>

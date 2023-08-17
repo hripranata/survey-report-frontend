@@ -240,6 +240,7 @@ export default function LoadingReport() {
                             <thead>
                                 <tr>
                                     <th>LO</th>
+                                    <th>Status</th>
                                     <th>Product</th>
                                     <th>QTY</th>
                                 </tr>
@@ -248,12 +249,13 @@ export default function LoadingReport() {
                             {loDetail.lo_details?.map((lo, index) => (
                                 <tr key={index}>
                                     <td>{lo.lo_number}</td>
+                                    <td><i className="fa fa-check" style={{color: "#1E968C"}} hidden={lo.bunker_id !== null?'':'hidden'}></i></td>
                                     <td>{lo.product}</td>
                                     <td>{lo.qty}</td>
                                 </tr>
                             ))}
                                 <tr>
-                                    <td colSpan="2">Total</td>
+                                    <td colSpan="3" className="text-end">Total</td>
                                     <td>{loDetail.vol_lo}</td>
                                 </tr>
                             </tbody>

@@ -23,6 +23,11 @@ export default function Login() {
         timerProgressBar: true
     })
 
+    const [showPass, setShowPass] = useState(false)
+
+    const handlePass = () => {
+        setShowPass(!showPass)
+    }
 
     const loginHandler = (ev) => {
         ev.preventDefault();
@@ -63,11 +68,12 @@ export default function Login() {
                 <h1 className="h3 mb-3 fw-normal text-center">Bunker Report</h1>
 
                 <div className="form-floating">
-                    <input type="text" className="form-control" name="username" onChange={(e) => setUsername(e.target.value)} placeholder="NIK" required></input>
+                    <input type="text" className="form-control" name="username" onChange={(e) => setUsername(e.target.value)} placeholder="NIK" required />
                     <label htmlFor="floatingInput">NIK</label>
                 </div>
                 <div className="form-floating">
-                    <input type="password" className="form-control" name="password" onChange={(e) => setPassword(e.target.value)} placeholder="Password" required></input>
+                    <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="password" onChange={(e) => setPassword(e.target.value)} placeholder="Password" required></input>
+                    <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer`} />
                     <label htmlFor="floatingPassword">Password</label>
                 </div>
                 <button className="btn btn-primary w-100 py-2 my-3" type="submit">Login</button>
