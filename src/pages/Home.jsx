@@ -16,7 +16,7 @@ export default function Home() {
     }
     const API_URL = "http://localhost:8000";
 
-    const handleLoadingCounter = async () => {
+    const handleCounter = async () => {
         await axios.get(`${API_URL}/api/loadings/count/${now.getMonth()+1}`, {
             headers: headers
         })
@@ -38,7 +38,7 @@ export default function Home() {
     }
 
     useEffect(() => {
-        handleLoadingCounter()
+        handleCounter()
         setProgress(100)
     }, []);
     return (
@@ -49,8 +49,8 @@ export default function Home() {
                     <div className="col-md-3" style={{position: "relative"}}>
                         <div className="card-counter primary">
                             <i className="fa fa-ship"></i>
-                            <span className="count-numbers">{loadingCounter.total_loading} {loadingCounter.total_loading}</span>
-                            <span className="count-name">Loadings</span>
+                            <span className="count-numbers">{loadingCounter.total_loading}</span>
+                            <span className="count-name">Total Loadings</span>
                         </div>
                     </div>
 
@@ -58,7 +58,7 @@ export default function Home() {
                         <div className="card-counter danger">
                             <i className="fa fa-anchor"></i>
                             <span className="count-numbers">{bunkerCounter.total_bunker}</span>
-                            <span className="count-name">Bunker</span>
+                            <span className="count-name">Total Bunker</span>
                         </div>
                     </div>
 
@@ -79,6 +79,8 @@ export default function Home() {
                     </div>
 
                 </div>
+
+                
             </div>
         
         </>

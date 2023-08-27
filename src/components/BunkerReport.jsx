@@ -1,17 +1,43 @@
 import axios from "axios";
 import { useAuth } from "../context/Auth";
 import { useState, useEffect } from "react";
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2'
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function BunkerReport() {
     const { auth } = useAuth();
+    const navigate = useNavigate();
     const [bunkers, setBunkers] = useState([])
     const [loDetail, setLoDetail] = useState([])
     const [editReport, setEditReport] = useState(false)
     const [groupReport, setGroupReport] = useState(false)
     const now = new Date()
 
+    const [startDate, setStartDate] = useState(new Date());
     const [month, setMonth] = useState(now.getMonth()+1)
+    const [year, setYear] = useState(now.getFullYear())
+
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+                ];
+    const renderMonthContent = (month, shortMonth, longMonth) => {
+        const tooltipText = `Tooltip for month: ${longMonth}`;
+        return <span title={tooltipText}>{shortMonth}</span>;
+        };
+
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'bottom-end',
+        iconColor: 'white',
+        customClass: {
+            popup: 'colored-toast'
+        },
+        showConfirmButton: false,
+        timer: 1250,
+        timerProgressBar: true
+    })
 
     const headers = {
         'Content-Type' : 'application/json',
@@ -31,12 +57,13 @@ export default function BunkerReport() {
     const handleAllBunker = (group) => {
         setGroupReport(group)
         setEditReport(false)
-        handleBunkerFilter(month, group)
+        handleBunkerFilter(month, year, group)
     }
 
-    const handleBunkerFilter = async (month, group) => {
+    const handleBunkerFilter = async (month, year, group) => {
         setMonth(month)
-        await axios.get(`${API_URL}/api/bunkers/filter/${month}`, {
+        setYear(year)
+        await axios.get(`${API_URL}/api/bunkers/filter/${month}/${year}`, {
             headers: headers
         })
         .then((res) => {
@@ -67,9 +94,132 @@ export default function BunkerReport() {
         })
     }
 
+    const handleExport = async () => {
+        await axios.get(`${API_URL}/api/exports/bunkers/${month}/${year}`, {
+            headers: headers,
+            responseType: 'blob', 
+        })
+        .then((res) => {
+            // create file link in browser's memory
+            const href = URL.createObjectURL(res.data);
+
+            // create "a" HTML element with href to file & click
+            const link = document.createElement('a');
+            link.href = href;
+            link.setAttribute('download', `Bunkers_${monthNames[month-1]}_${year}.xlsx`); //or any other extension
+            document.body.appendChild(link);
+            link.click();
+
+            // clean up "a" element & remove ObjectURL
+            document.body.removeChild(link);
+            URL.revokeObjectURL(href);
+        })
+        .catch((err) => {
+            console.error(err);
+        })
+    }
+
+    const handleEditButton = (id) => {
+        Swal.fire({
+            title: 'Do you want to edit the data?',
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: 'Yes',
+            denyButtonText: 'No',
+            allowOutsideClick: false,
+            customClass: {
+              actions: 'my-actions',
+              cancelButton: 'order-1 right-gap',
+              confirmButton: 'order-2',
+              denyButton: 'order-3',
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+                navigate(`/bunker/edit/${id}`);
+            }
+          })
+    }
+
+    const handleDeleteButton = (id) => {
+        Swal.fire({
+            title: 'Do you want to delete the data?',
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: 'Yes',
+            denyButtonText: 'No',
+            allowOutsideClick: false,
+            customClass: {
+              actions: 'my-actions',
+              cancelButton: 'order-1 right-gap',
+              confirmButton: 'order-2',
+              denyButton: 'order-3',
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+                handleDeleteBunker(id)
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Success updating data!'
+                  })
+            }
+          })
+    }
+
+    const handleExportButton = () => {
+        Swal.fire({
+            title: `Export report data ${monthNames[month-1]}-${year} ?`,
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: 'Yes',
+            denyButtonText: 'No',
+            allowOutsideClick: false,
+            customClass: {
+              actions: 'my-actions',
+              cancelButton: 'order-1 right-gap',
+              confirmButton: 'order-2',
+              denyButton: 'order-3',
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+                handleExport()
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Success export data!'
+                  })
+            }
+          })
+    }
+
     useEffect(() => {
-        handleBunkerFilter(month, groupReport)
+        handleBunkerFilter(month, year, groupReport)
     }, []);
+
+    const handleCopy = (bunker) => {
+        const copyText = `
+        *Nama tongkang*         : ${bunker.tongkang.vessel_name}
+        *Nama KRI*              : ${bunker.kri.vessel_name}
+        *Lokasi Bunker*         : ${bunker.bunker_location}
+        *Mulai bunker*          : ${bunker.start.split(' ')[1].substring(0,5).replace(':','.')} / ${bunker.start.split(' ')[0].split("-").reverse().join("-")}
+        *Selesai bunker*        : ${bunker.stop.split(' ')[1].substring(0,5).replace(':','.')} / ${bunker.stop.split(' ')[0].split("-").reverse().join("-")}
+        *No LO*                             
+        ${
+            bunker.lo_details?.map((lo) => {
+                return `${lo.lo_number} : ${lo.qty}` 
+        })
+        }
+        
+        *Volume LO*             : ${bunker.vol_lo}
+        *Volume KRI/AR*         : ${bunker.vol_ar}
+        *Petugas Survey*        : ${bunker.surveyor}
+        `
+        console.log(copyText);
+        if (copyText){
+            Toast.fire({
+                icon: 'success',
+                title: 'Copied to Clipboard'
+              })
+        }
+    }
     return(
         <>
             {/* <div className="tab-pane fade" id="nav-bunker" role="tabpanel" aria-labelledby="nav-bunker-tab" tabIndex="0"> */}
@@ -82,13 +232,24 @@ export default function BunkerReport() {
                     <div className="col">
                         <div className="btn-toolbar justify-content-end" role="toolbar" aria-label="Toolbar with button groups">
                             <div className="btn-group me-2" role="group" aria-label="Third group">
-                                <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport? true : false}>{editReport? 'Cancel Edit' : 'Edit Report' }</button>
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport? true : false}>{editReport? 'Cancel' : 'Edit' }</button>
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleExportButton()} disabled={groupReport && bunkers.length > 0 ? false : true}>Export</button>
                             </div>
                             <div className="btn-group" role="group" aria-label="Third group">
-                                <select className="form-select form-select-sm" style={{width: "auto"}} value={month} onChange={(e) => handleBunkerFilter(e.target.value, groupReport)} aria-label="monthlyfilter" name="monthlyfilter">
-                                    <option value="8">Aug 2023</option>
-                                    <option value="7">Jul 2023</option>
-                                </select>
+                                <div className="datePicker">
+                                    <DatePicker
+                                        selected={startDate}
+                                        renderMonthContent={renderMonthContent}
+                                        showMonthYearPicker
+                                        dateFormat="MM/yyyy"
+                                        onChange={(date) => {
+                                            setStartDate(date)
+                                            handleBunkerFilter(date.getMonth()+1, date.getFullYear(), groupReport)
+                                        }}
+                                        className="form-select form-select-sm"
+                                    />
+
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -108,6 +269,7 @@ export default function BunkerReport() {
                                 <th scope="col">LO Figure</th>
                                 <th scope="col">AR Figure</th>
                                 <th scope="col">Surveyor</th>
+                                <th scope="col">Copy</th>
                                 <th colSpan="2" style={editReport? {} : {display: "none"} }>Action</th>
                             </tr>
                         </thead>
@@ -121,21 +283,24 @@ export default function BunkerReport() {
                                     <td>{ bunker.tongkang.vessel_name}</td>
                                     <td>{ bunker.kri.vessel_name}</td>
                                     <td>{ bunker.bbm }</td>
-                                    <td>{ `${bunker.start.split(' ')[1].substring(0,5)} / ${bunker.start.split(' ')[0].split("-").reverse().join("-")}` }</td>
-                                    <td>{ `${bunker.stop.split(' ')[1].substring(0,5)} / ${bunker.stop.split(' ')[0].split("-").reverse().join("-")}` }</td>
+                                    <td>{ `${bunker.start.split(' ')[1].substring(0,5).replace(':','.')} / ${bunker.start.split(' ')[0].split("-").reverse().join("-")}` }</td>
+                                    <td>{ `${bunker.stop.split(' ')[1].substring(0,5).replace(':','.')} / ${bunker.stop.split(' ')[0].split("-").reverse().join("-")}` }</td>
                                     <td><button type="button" className="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#loDetailBunkerModal" onClick={() => handleLoDetail(bunker)}>LO - {bunker.lo_details.length}</button></td>
                                     <td>{ bunker.vol_lo }</td>
                                     <td>{ bunker.vol_ar }</td>
                                     <td>{ bunker.surveyor }</td>
+                                    <td>
+                                        <button type="button" className="btn btn-outline-primary btn-sm" onClick={()=>handleCopy(bunker)}><i className="fa fa-copy"></i></button>
+                                    </td>
                                     <td style={editReport? {} : {display: "none"} }>
-                                        <Link to={`/bunker/edit/${bunker.id}`} className="btn btn-outline-warning btn-sm"><i className="fa fa-pen"></i></Link>
+                                        <button type="button" className="btn btn-outline-warning btn-sm" onClick={()=>handleEditButton(bunker.id)}><i className="fa fa-pen"></i></button>
                                     </td>
 
-                                    <td style={editReport? {} : {display: "none"} }><button type="button" className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteBunker(bunker.id)}><i className="fa fa-trash"></i></button></td>
+                                    <td style={editReport? {} : {display: "none"} }><button type="button" className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteButton(bunker.id)}><i className="fa fa-trash"></i></button></td>
                                 </tr>
                                 ))
                             :   <tr>
-                                    <td colSpan="11" className="text-center">
+                                    <td colSpan="12" className="text-center">
                                         <div className="alert alert-danger mb-0">
                                             Data Belum Tersedia!
                                         </div>

@@ -1,8 +1,7 @@
 import './App.css'
 import { Routes, Route, Navigate } from "react-router-dom"
-import { RequireAuth } from './context/Auth'
-import { useState, useEffect } from 'react'
-import LoadingBar from 'react-top-loading-bar'
+import { RequireAuth, useAuth } from './context/Auth'
+import { useEffect } from 'react'
 import Home from "./pages/Home"
 import LoadingSurvey from './pages/LoadingSurvey'
 import BunkerSurvey from './pages/BunkerSurvey'
@@ -13,7 +12,8 @@ import Unauthorized from './pages/Unauthorized'
 import Layout from './components/Layout';
 import LoadingUpdate from './pages/LoadingUpdate'
 import BunkerUpdate from './pages/BunkerUpdate'
-import UserManagement from './pages/UserManagement'
+import Setting from './pages/Setting'
+import TopLoadingBar from './components/TopLoadingBar'
 
 const ROLES = {
   'User': 'user',
@@ -21,18 +21,14 @@ const ROLES = {
 }
 
 function App() {
-  const [progress, setProgress] = useState(0)
+  const { setProgress } = useAuth();
   useEffect(() => {
       document.body.style.backgroundColor = "#F1F4F7"
       setProgress(100)
   }, []);
   return (
     <>
-      <LoadingBar
-        color='#f11946'
-        progress={progress}
-        onLoaderFinished={() => setProgress(0)}
-      />
+      <TopLoadingBar/>
       <div className="page-container">
         <Routes>
           <Route element={<Layout />}>
@@ -47,7 +43,7 @@ function App() {
                   <Route path="/profile" element={<Profile />} />
               </Route>
               <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
-                  <Route path="/usermanagement" element={<UserManagement />} />
+                  <Route path="/setting" element={<Setting />} />
               </Route>
               <Route path="/login" element={<Login />} />
               <Route path="/unauthorized" element={<Unauthorized />} />

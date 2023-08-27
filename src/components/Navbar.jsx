@@ -60,7 +60,7 @@ export default function Navbar() {
                                     <NavLink to="/password" className="nav-link"><i className="fa fa-key"></i> Password Change</NavLink>
                                 </li>
                                 <li className="dropdown-item" hidden={`${auth?.data?.user?.role !== 'admin'? 'hidden' : ''}`}>
-                                    <NavLink to="/usermanagement" className="nav-link"><i className="fa fa-tools"></i> Settings</NavLink>
+                                    <NavLink to="/setting" className="nav-link"><i className="fa fa-tools"></i> Settings</NavLink>
                                 </li>
                                 <li><hr className="dropdown-divider"></hr></li>
                                 <li><button className="dropdown-item" onClickCapture={logout}><i className="fa fa-power-off"></i> Logout</button></li>

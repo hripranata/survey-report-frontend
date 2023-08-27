@@ -189,6 +189,40 @@ export default function LoadingSurvey() {
         }));
     };
 
+    const [loadingScrape, setLoadingScrape] = useState([])
+
+    const addFromScrape = async () => {
+        await axios.get('http://localhost:3500/api/ibunker', { headers: headers })
+        .then((res) => {
+            setLoadingScrape(res.data.reports)
+        })
+        .catch((err) => {
+            console.error(err);
+        })
+    }
+
+    const changeLoQtyTypeScrape = (rows) => {
+        return rows.map(row => {
+            return {
+                lo_number: row.lo_number,
+                qty: parseInt(row.qty) * 1000
+            }
+        })
+    }
+
+    const handleSaveScrape = (scraped) => {
+        setFormData((prevFormData) => ({ 
+            ...prevFormData, 
+            lo_details: changeLoQtyTypeScrape(scraped.lo_number),
+            loVol: parseInt(scraped.detail?.lo_volume.split(' ')[0]) * 1000,
+        }));
+        setRowsData(changeLoQtyTypeScrape(scraped.lo_number))
+        Toast.fire({
+            icon: 'success',
+            title: 'Data successfully selected!'
+          })
+    }
+
     useEffect(() => {
         handleTongkangList()
         setProgress(100)
@@ -248,7 +282,10 @@ export default function LoadingSurvey() {
                             <thead className="text-center">
                                 <tr>
                                     <th colSpan="2">LO Number</th>
-                                    <td className="align-middle"><button type="button" className="btn btn-sm btn-success" onClick={addTableRows}>+</button></td>
+                                    <td className="align-middle">
+                                        <button type="button" className="btn btn-sm btn-primary me-2" data-bs-toggle="modal" data-bs-target="#loDetailLoadingModal" onClick={addFromScrape}>iB</button>
+                                        <button type="button" className="btn btn-sm btn-success" onClick={addTableRows}>+</button>
+                                    </td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -274,6 +311,67 @@ export default function LoadingSurvey() {
                         </div>
                     </div>
                 </form>
+            </div>
+            <div className="modal fade" id="loDetailLoadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="loDetailLoadingModalLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title" id="loDetailLoadingModalLabel">iBunker Loading</h5>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div className="modal-body">
+                        <div className="accordion" id="accordionExample">
+                            { loadingScrape.length > 0 ?
+                                loadingScrape?.map((loading, index) => (
+                                    
+                                    <div className="accordion-item" key={index}>
+                                        <h2 className="accordion-header">
+                                        <button className={`accordion-button ${index == 0?'':'collapsed'}`} type="button" data-bs-toggle="collapse" data-bs-target={`#collapse${index}`} aria-expanded={index == 0?"true":"false"} aria-controls={`collapse${index}`}>
+                                            {loading.spob} / {loading.detail?.produk} - {loading.detail?.lo_volume} / {loading.detail?.status}
+                                        </button>
+                                        </h2>
+                                        <div id={`collapse${index}`} className={`accordion-collapse collapse ${index == 0?'show':''}`} data-bs-parent="#accordionExample">
+                                            <div className="accordion-body">
+                                            <table className="table table-bordered mb-2 text-center">
+                                                <thead>
+                                                    <tr>
+                                                        <th>LO</th>
+                                                        <th>QTY</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                {loading.lo_number?.map((lo, index) => (
+                                                    <tr key={index}>
+                                                        <td>{lo.lo_number}</td>
+                                                        <td>{parseInt(lo.qty) * 1000}</td>
+                                                    </tr>
+                                                ))}
+                                                    <tr>
+                                                        <td className="text-end">Total</td>
+                                                        <td>{parseInt(loading.detail?.lo_volume.split(' ')[0]) * 1000}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <div className="text-end">
+                                                <button type="button" className="btn btn-primary" onClick={()=> handleSaveScrape(loading)}>Select</button>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                                :   <div className="text-center">
+                                        <div className="spinner-border text-primary" role="status">
+                                            <span className="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                            }
+                        </div>
+                    </div>
+                    <div className="modal-footer">
+                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                    </div>
+                </div>
             </div>
         </>
     )

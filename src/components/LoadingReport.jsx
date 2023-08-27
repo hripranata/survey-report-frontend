@@ -3,6 +3,8 @@ import { useAuth } from "../context/Auth";
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function LoadingReport() {
     const { auth } = useAuth();
@@ -13,7 +15,17 @@ export default function LoadingReport() {
     const [groupReport, setGroupReport] = useState(false)
     const now = new Date()
 
+    const [startDate, setStartDate] = useState(new Date());
     const [month, setMonth] = useState(now.getMonth()+1)
+    const [year, setYear] = useState(now.getFullYear())
+
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+                ];
+    const renderMonthContent = (month, shortMonth, longMonth) => {
+        const tooltipText = `Tooltip for month: ${longMonth}`;
+        return <span title={tooltipText}>{shortMonth}</span>;
+        };
 
     const Toast = Swal.mixin({
         toast: true,
@@ -45,12 +57,13 @@ export default function LoadingReport() {
     const handleAllLoading = (group) => {
         setGroupReport(group)
         setEditReport(false)
-        handleLoadingFilter(month, group)
+        handleLoadingFilter(month, year, group)
     }
 
-    const handleLoadingFilter = async (month, group) => {
+    const handleLoadingFilter = async (month, year, group) => {
         setMonth(month)
-        await axios.get(`${API_URL}/api/loadings/filter/${month}`, {
+        setYear(year)
+        await axios.get(`${API_URL}/api/loadings/filter/${month}/${year}`, {
             headers: headers
         })
         .then((res) => {
@@ -73,8 +86,33 @@ export default function LoadingReport() {
             headers: headers
         })
         .then(() => {
-            handleLoadingFilter(month, groupReport)
+            handleLoadingFilter(month, year, groupReport)
             setEditReport(false)
+        })
+        .catch((err) => {
+            console.error(err);
+        })
+    }
+
+    const handleExport = async () => {
+        await axios.get(`${API_URL}/api/exports/loadings/${month}/${year}`, {
+            headers: headers,
+            responseType: 'blob', 
+        })
+        .then((res) => {
+            // create file link in browser's memory
+            const href = URL.createObjectURL(res.data);
+
+            // create "a" HTML element with href to file & click
+            const link = document.createElement('a');
+            link.href = href;
+            link.setAttribute('download', `Loadings_${monthNames[month-1]}_${year}.xlsx`); //or any other extension
+            document.body.appendChild(link);
+            link.click();
+
+            // clean up "a" element & remove ObjectURL
+            document.body.removeChild(link);
+            URL.revokeObjectURL(href);
         })
         .catch((err) => {
             console.error(err);
@@ -125,12 +163,62 @@ export default function LoadingReport() {
                   })
             }
           })
-          
+    }
+    const handleExportButton = () => {
+        Swal.fire({
+            title: `Export report data ${monthNames[month-1]}-${year} ?`,
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: 'Yes',
+            denyButtonText: 'No',
+            allowOutsideClick: false,
+            customClass: {
+              actions: 'my-actions',
+              cancelButton: 'order-1 right-gap',
+              confirmButton: 'order-2',
+              denyButton: 'order-3',
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+                handleExport()
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Success export data!'
+                  })
+            }
+          })
     }
 
     useEffect(() => {
-        handleLoadingFilter(month, groupReport)
+        handleLoadingFilter(month, year, groupReport)
     }, []);
+
+    const handleCopy = (loading) => {
+        const copyText = `
+        *Tanggal LO*            : ${loading.lo_date}
+        *Nama tongkang*         : ${loading.tongkang.vessel_name}
+        *Jenis BBM*             : ${loading.bbm}
+        *Mulai loading*         : ${loading.start.split(' ')[1].substring(0,5).replace(':','.')} / ${loading.start.split(' ')[0].split("-").reverse().join("-")}
+        *Selesai Loading*       : ${loading.stop.split(' ')[1].substring(0,5).replace(':','.')} / ${loading.stop.split(' ')[0].split("-").reverse().join("-")}
+        *No LO*                             
+        ${
+            loading.lo_details?.map((lo) => {
+                return `${lo.lo_number} : ${lo.qty}` 
+        })
+        }
+        
+        *Volume LO*             : ${loading.vol_lo}
+        *AL/ Volume Tongkang*   : ${loading.vol_al}
+        *Petugas Survey*        : ${loading.surveyor}
+        `
+        console.log(copyText);
+        if (copyText){
+            Toast.fire({
+                icon: 'success',
+                title: 'Copied to Clipboard'
+              })
+        }
+    }
 
     return (
         <>
@@ -143,14 +231,24 @@ export default function LoadingReport() {
                     </div>
                     <div className="col">
                         <div className="btn-toolbar justify-content-end" role="toolbar" aria-label="Toolbar with button groups">
-                            <div className="btn-group me-2" role="group" aria-label="Third group">
-                                <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport? true : false}>{editReport? 'Cancel Edit' : 'Edit Report' }</button>
+                            <div className="btn-group me-2" role="group" aria-label="First group">
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport? true : false}>{editReport? 'Cancel' : 'Edit' }</button>
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleExportButton()} disabled={groupReport && loadings.length > 0 ? false : true}>Export</button>
                             </div>
-                            <div className="btn-group" role="group" aria-label="Third group">
-                                <select className="form-select form-select-sm" style={{width: "auto"}} value={month} onChange={(e) => handleLoadingFilter(e.target.value, groupReport)} aria-label="monthlyfilter" name="monthlyfilter">
-                                    <option value="8">Aug 2023</option>
-                                    <option value="7">Jul 2023</option>
-                                </select>
+                            <div className="btn-group" role="group" aria-label="Second group">
+                                <div className="datePicker">
+                                    <DatePicker
+                                        selected={startDate}
+                                        renderMonthContent={renderMonthContent}
+                                        showMonthYearPicker
+                                        dateFormat="MM/yyyy"
+                                        onChange={(date) => {
+                                            setStartDate(date)
+                                            handleLoadingFilter(date.getMonth()+1, date.getFullYear(), groupReport)
+                                        }}
+                                        className="form-select form-select-sm"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -161,6 +259,7 @@ export default function LoadingReport() {
                         <thead className="table-primary">
                             <tr>
                                 <th scope="col">No</th>
+                                <th scope="col">LO Date</th>
                                 <th scope="col">Nama Kapal Supply</th>
                                 <th scope="col">Jenis BBM</th>
                                 <th scope="col">Mulai Loading</th>
@@ -169,6 +268,7 @@ export default function LoadingReport() {
                                 <th scope="col">LO Figure</th>
                                 <th scope="col">AL Figure</th>
                                 <th scope="col">Surveyor</th>
+                                <th scope="col">Copy</th>
                                 <th colSpan="2" style={editReport? {} : {display: "none"} }>Action</th>
                                 
                             </tr>
@@ -177,26 +277,28 @@ export default function LoadingReport() {
                         {
                         loadings.length > 0
                         ?   loadings.map((loading, index) => (
-                            <tr key={index}>
-                                <th scope="row">{index + 1}</th>
-                                <td>{ loading.tongkang.vessel_name}</td>
-                                <td>{ loading.bbm }</td>
-                                <td>{ `${loading.start.split(' ')[1].substring(0,5)} / ${loading.start.split(' ')[0].split("-").reverse().join("-")}` }</td>
-                                <td>{ `${loading.stop.split(' ')[1].substring(0,5)} / ${loading.stop.split(' ')[0].split("-").reverse().join("-")}` }</td>
-                                <td><button type="button" className="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#loDetailLoadingModal" onClick={() => handleLoDetail(loading)}>LO - {loading.lo_details.length}</button></td>
-                                <td>{ loading.vol_lo }</td>
-                                <td>{ loading.vol_al }</td>
-                                <td>{ loading.surveyor }</td>
-                                <td style={editReport? {} : {display: "none"} }>
-                                    {/* <Link to={`/loading/edit/${loading.id}`} className="btn btn-outline-warning btn-sm" onClick={()=>handleEditButton(loading.id)}><i className="fa fa-pen"></i></Link> */}
-                                    <button type="button" className="btn btn-outline-warning btn-sm" onClick={()=>handleEditButton(loading.id)}><i className="fa fa-pen"></i></button>
-                                </td>
-
-                                <td style={editReport? {} : {display: "none"} }><button type="button" className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteButton(loading.id)}><i className="fa fa-trash"></i></button></td>
-                            </tr>
+                                <tr key={index}>
+                                    <th scope="row">{index + 1}</th>
+                                    <td>{ loading.lo_date.split("-").reverse().join("-")}</td>
+                                    <td>{ loading.tongkang.vessel_name}</td>
+                                    <td>{ loading.bbm }</td>
+                                    <td>{ `${loading.start.split(' ')[1].substring(0,5).replace(':','.')} / ${loading.start.split(' ')[0].split("-").reverse().join("-")}` }</td>
+                                    <td>{ `${loading.stop.split(' ')[1].substring(0,5).replace(':','.')} / ${loading.stop.split(' ')[0].split("-").reverse().join("-")}` }</td>
+                                    <td><button type="button" className="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#loDetailLoadingModal" onClick={() => handleLoDetail(loading)}>LO - {loading.lo_details.length}</button></td>
+                                    <td>{ loading.vol_lo }</td>
+                                    <td>{ loading.vol_al }</td>
+                                    <td>{ loading.surveyor }</td>
+                                    <td>
+                                        <button type="button" className="btn btn-outline-primary btn-sm" onClick={()=>handleCopy(loading)}><i className="fa fa-copy"></i></button>
+                                    </td>
+                                    <td style={editReport? {} : {display: "none"} }>
+                                        <button type="button" className="btn btn-outline-warning btn-sm" onClick={()=>handleEditButton(loading.id)}><i className="fa fa-pen"></i></button>
+                                    </td>
+                                    <td style={editReport? {} : {display: "none"} }><button type="button" className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteButton(loading.id)}><i className="fa fa-trash"></i></button></td>
+                                </tr>
                             ))
                         :   <tr>
-                                <td colSpan="9" className="text-center">
+                                <td colSpan="11" className="text-center">
                                     <div className="alert alert-danger mb-0">
                                         Data Belum Tersedia!
                                     </div>
