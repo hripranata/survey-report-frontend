@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import copy from "copy-to-clipboard";
 
 export default function LoadingReport() {
     const { auth } = useAuth();
@@ -15,17 +16,30 @@ export default function LoadingReport() {
     const [groupReport, setGroupReport] = useState(false)
     const now = new Date()
 
-    const [startDate, setStartDate] = useState(new Date());
+    const [firstDate, setFirstDate] = useState(new Date(now.getFullYear(), now.getMonth(), 1));
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const dateFormat = (date) => {
+        let day = date.getDate();
+        let month = date.getMonth();
+        let year = date.getFullYear();
+
+        if (day < 10) {
+            day = `0${day}`;
+        }
+        
+        if (month < 10) {
+            month = `0${month+1}`;
+        }
+        
+        return `${year}-${month}-${day}`;
+    }
+
     const [month, setMonth] = useState(now.getMonth()+1)
     const [year, setYear] = useState(now.getFullYear())
 
     const monthNames = ["January", "February", "March", "April", "May", "June",
                 "July", "August", "September", "October", "November", "December"
                 ];
-    const renderMonthContent = (month, shortMonth, longMonth) => {
-        const tooltipText = `Tooltip for month: ${longMonth}`;
-        return <span title={tooltipText}>{shortMonth}</span>;
-        };
 
     const Toast = Swal.mixin({
         toast: true,
@@ -57,28 +71,37 @@ export default function LoadingReport() {
     const handleAllLoading = (group) => {
         setGroupReport(group)
         setEditReport(false)
-        handleLoadingFilter(month, year, group)
+        handleLoadingFilter(firstDate, currentDate, group)
     }
 
-    const handleLoadingFilter = async (month, year, group) => {
-        setMonth(month)
-        setYear(year)
-        await axios.get(`${API_URL}/api/loadings/filter/${month}/${year}`, {
-            headers: headers
-        })
-        .then((res) => {
-            if (group){
+    const handleLoadingFilter = async (firstDate, currentDate, group) => {
+        setFirstDate(firstDate)
+        setCurrentDate(currentDate)
+        setMonth(firstDate.getMonth()+1)
+        setYear(currentDate.getFullYear())
+        
+        if (group){
+            await axios.get(`${API_URL}/api/loadings/filterbydate/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
+                headers: headers
+            })
+            .then((res) => {
                 setLoadings(res.data.data);
-            } else {
-                const myreport = res.data.data.filter((lo) => {
-                    return lo.surveyor == auth.data.user.name
-                })
-                setLoadings(myreport);
-            }
-        })
-        .catch((err) => {
-            console.error(err);
-        })
+            })
+            .catch((err) => {
+                console.error(err);
+            })
+        } else {
+            await axios.get(`${API_URL}/api/loadings/filterbyuser/${auth.data.user.id}/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
+                headers: headers
+            })
+            .then((res) => {
+                console.log(res.data);
+                setLoadings(res.data.data);
+            })
+            .catch((err) => {
+                console.error(err);
+            })
+        }
     }
 
     const handleDeleteLoading = async (id) => {
@@ -86,7 +109,7 @@ export default function LoadingReport() {
             headers: headers
         })
         .then(() => {
-            handleLoadingFilter(month, year, groupReport)
+            handleLoadingFilter(firstDate, currentDate, groupReport)
             setEditReport(false)
         })
         .catch((err) => {
@@ -190,7 +213,7 @@ export default function LoadingReport() {
     }
 
     useEffect(() => {
-        handleLoadingFilter(month, year, groupReport)
+        handleLoadingFilter(firstDate, currentDate, groupReport)
     }, []);
 
     const handleCopy = (loading) => {
@@ -212,7 +235,9 @@ export default function LoadingReport() {
         *Petugas Survey*        : ${loading.surveyor}
         `
         console.log(copyText);
-        if (copyText){
+        let isCopy = copy(copyText);
+
+        if (isCopy){
             Toast.fire({
                 icon: 'success',
                 title: 'Copied to Clipboard'
@@ -225,6 +250,30 @@ export default function LoadingReport() {
             {/* <div className="tab-pane fade show active" id="nav-loading" role="tabpanel" aria-labelledby="nav-loading-tab" tabIndex="0"> */}
                 <h4 className="text-center mt-3">Loading Report</h4>
                 <div className="row mb-3 mt-3">
+                    <div className="col text-center">
+                        <DatePicker 
+                            selected={firstDate}
+                            dateFormat="dd/MM/yyyy" 
+                            onChange={(date) => {
+                                setFirstDate(date)
+                                handleLoadingFilter(date, currentDate, groupReport)
+                            }}
+                            className="form-select form-select-sm"
+                        />
+                    </div>
+                    <div className="col">
+                        <DatePicker 
+                            selected={currentDate}
+                            dateFormat="dd/MM/yyyy" 
+                            onChange={(date) => {
+                                setCurrentDate(date)
+                                handleLoadingFilter(firstDate, date, groupReport)
+                            }} 
+                            className="form-select form-select-sm" 
+                        />
+                    </div>
+                </div>
+                <div className="row mb-3 mt-3">
                     <div className="col text-start">
                         <button className={`btn btn-outline-primary btn-sm me-2 ${groupReport?'':'active'}`} type="button" onClick={groupReport? ()=>handleAllLoading(!groupReport) : ()=>{}}>My Report</button>
                         <button className={`btn btn-outline-primary btn-sm ${groupReport?'active':''}`} type="button" onClick={groupReport? ()=>{} : ()=>handleAllLoading(!groupReport)}>All Report</button>
@@ -234,21 +283,6 @@ export default function LoadingReport() {
                             <div className="btn-group me-2" role="group" aria-label="First group">
                                 <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport? true : false}>{editReport? 'Cancel' : 'Edit' }</button>
                                 <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleExportButton()} disabled={groupReport && loadings.length > 0 ? false : true}>Export</button>
-                            </div>
-                            <div className="btn-group" role="group" aria-label="Second group">
-                                <div className="datePicker">
-                                    <DatePicker
-                                        selected={startDate}
-                                        renderMonthContent={renderMonthContent}
-                                        showMonthYearPicker
-                                        dateFormat="MM/yyyy"
-                                        onChange={(date) => {
-                                            setStartDate(date)
-                                            handleLoadingFilter(date.getMonth()+1, date.getFullYear(), groupReport)
-                                        }}
-                                        className="form-select form-select-sm"
-                                    />
-                                </div>
                             </div>
                         </div>
                     </div>

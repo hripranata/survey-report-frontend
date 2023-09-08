@@ -181,13 +181,13 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 .datePicker {
-  width: auto;
+  width: 100%;
 }
 
 .react-datepicker-wrapper,
 .react-datepicker__input-container,
 .react-datepicker__input-container input {
-  width: 100px !important;
+  width: 100% !important;
 }
 
 .react-datepicker__navigation-icon {

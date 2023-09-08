@@ -49,6 +49,8 @@ export default function Login() {
                          navigate("/home")
                     })
                     .catch(function () {
+                        setUsername("")
+                        setPassword("")
                         Toast.fire({
                             icon: 'error',
                             title: 'Username or Password are not match !'
@@ -68,11 +70,11 @@ export default function Login() {
                 <h1 className="h3 mb-3 fw-normal text-center">Bunker Report</h1>
 
                 <div className="form-floating">
-                    <input type="text" className="form-control" name="username" onChange={(e) => setUsername(e.target.value)} placeholder="NIK" required />
+                    <input type="text" className="form-control" name="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="NIK" required />
                     <label htmlFor="floatingInput">NIK</label>
                 </div>
                 <div className="form-floating">
-                    <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="password" onChange={(e) => setPassword(e.target.value)} placeholder="Password" required></input>
+                    <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required></input>
                     <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer`} />
                     <label htmlFor="floatingPassword">Password</label>
                 </div>
