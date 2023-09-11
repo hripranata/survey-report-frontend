@@ -6,6 +6,7 @@ import Swal from 'sweetalert2'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import copy from "copy-to-clipboard";
+import ReactPaginate from 'react-paginate';
 
 export default function LoadingReport() {
     const { auth } = useAuth();
@@ -40,6 +41,18 @@ export default function LoadingReport() {
     const monthNames = ["January", "February", "March", "April", "May", "June",
                 "July", "August", "September", "October", "November", "December"
                 ];
+    
+    // pagination
+    const [currentPage, setCurrentPage] = useState(0)
+    const [totalPages, setTotalPages] = useState(0)
+    const itemsPerPage = 10
+    const startIndex = currentPage * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const subset = loadings.slice(startIndex, endIndex);
+
+    const handlePageChange = (selectedPage) => {
+        setCurrentPage(selectedPage.selected);
+    };
 
     const Toast = Swal.mixin({
         toast: true,
@@ -72,6 +85,7 @@ export default function LoadingReport() {
         setGroupReport(group)
         setEditReport(false)
         handleLoadingFilter(firstDate, currentDate, group)
+        setCurrentPage(0)
     }
 
     const handleLoadingFilter = async (firstDate, currentDate, group) => {
@@ -86,6 +100,7 @@ export default function LoadingReport() {
             })
             .then((res) => {
                 setLoadings(res.data.data);
+                setTotalPages(Math.ceil(res.data.data.length / itemsPerPage));
             })
             .catch((err) => {
                 console.error(err);
@@ -95,8 +110,8 @@ export default function LoadingReport() {
                 headers: headers
             })
             .then((res) => {
-                console.log(res.data);
                 setLoadings(res.data.data);
+                setTotalPages(Math.ceil(res.data.data.length / itemsPerPage));
             })
             .catch((err) => {
                 console.error(err);
@@ -218,6 +233,7 @@ export default function LoadingReport() {
 
     const handleCopy = (loading) => {
         const copyText = `
+        _Loading 00_
         *Tanggal LO*            : ${loading.lo_date}
         *Nama tongkang*         : ${loading.tongkang.vessel_name}
         *Jenis BBM*             : ${loading.bbm}
@@ -281,7 +297,7 @@ export default function LoadingReport() {
                     <div className="col">
                         <div className="btn-toolbar justify-content-end" role="toolbar" aria-label="Toolbar with button groups">
                             <div className="btn-group me-2" role="group" aria-label="First group">
-                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport? true : false}>{editReport? 'Cancel' : 'Edit' }</button>
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport || loadings.length == 0 ? true : false}>{editReport? 'Cancel' : 'Edit' }</button>
                                 <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleExportButton()} disabled={groupReport && loadings.length > 0 ? false : true}>Export</button>
                             </div>
                         </div>
@@ -309,10 +325,10 @@ export default function LoadingReport() {
                         </thead>
                         <tbody>
                         {
-                        loadings.length > 0
-                        ?   loadings.map((loading, index) => (
+                        subset.length > 0
+                        ?   subset.map((loading, index) => (
                                 <tr key={index}>
-                                    <th scope="row">{index + 1}</th>
+                                    <th scope="row">{currentPage > 0? currentPage * 10 + (index + 1) : index + 1}</th>
                                     <td>{ loading.lo_date.split("-").reverse().join("-")}</td>
                                     <td>{ loading.tongkang.vessel_name}</td>
                                     <td>{ loading.bbm }</td>
@@ -342,24 +358,20 @@ export default function LoadingReport() {
                         </tbody>
                     </table>
                 </div>
+                <ReactPaginate
+                    pageCount={totalPages}
+                    onPageChange={handlePageChange}
+                    forcePage={currentPage}
+                    containerClassName=""
+                    className={"pagination justify-content-center"}
+                    pageClassName={"page-link"}
+                    previousLabel={<span aria-hidden="true">&laquo;</span>}
+                    nextLabel={<span aria-hidden="true">&raquo;</span>}
+                    previousLinkClassName={"page-link"}
+                    nextLinkClassName={"page-link"}
+                    activeClassName={"active"}
+                />
 
-                <nav aria-label="Page navigation example" className="mt-2 mb-2" >
-                    <ul className="pagination justify-content-center">
-                        <li className="page-item disabled">
-                        <a className="page-link" href="#" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                        </li>
-                        <li className="page-item active"><a className="page-link" href="#">1</a></li>
-                        <li className="page-item"><a className="page-link" href="#">2</a></li>
-                        <li className="page-item"><a className="page-link" href="#">3</a></li>
-                        <li className="page-item">
-                        <a className="page-link" href="#" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                        </li>
-                    </ul>
-                </nav>
             {/* </div> */}
 
             {/* Modal LO Detail */}

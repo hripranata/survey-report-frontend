@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import copy from "copy-to-clipboard";
+import ReactPaginate from 'react-paginate';
 
 export default function BunkerReport() {
     const { auth } = useAuth();
@@ -15,17 +17,42 @@ export default function BunkerReport() {
     const [groupReport, setGroupReport] = useState(false)
     const now = new Date()
 
-    const [startDate, setStartDate] = useState(new Date());
+    const [firstDate, setFirstDate] = useState(new Date(now.getFullYear(), now.getMonth(), 1));
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const dateFormat = (date) => {
+        let day = date.getDate();
+        let month = date.getMonth();
+        let year = date.getFullYear();
+
+        if (day < 10) {
+            day = `0${day}`;
+        }
+        
+        if (month < 10) {
+            month = `0${month+1}`;
+        }
+        
+        return `${year}-${month}-${day}`;
+    }
+
     const [month, setMonth] = useState(now.getMonth()+1)
     const [year, setYear] = useState(now.getFullYear())
 
     const monthNames = ["January", "February", "March", "April", "May", "June",
                 "July", "August", "September", "October", "November", "December"
                 ];
-    const renderMonthContent = (month, shortMonth, longMonth) => {
-        const tooltipText = `Tooltip for month: ${longMonth}`;
-        return <span title={tooltipText}>{shortMonth}</span>;
-        };
+
+    // pagination
+    const [currentPage, setCurrentPage] = useState(0)
+    const [totalPages, setTotalPages] = useState(0)
+    const itemsPerPage = 10
+    const startIndex = currentPage * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const subset = bunkers.slice(startIndex, endIndex);
+
+    const handlePageChange = (selectedPage) => {
+        setCurrentPage(selectedPage.selected);
+    };
 
     const Toast = Swal.mixin({
         toast: true,
@@ -57,28 +84,37 @@ export default function BunkerReport() {
     const handleAllBunker = (group) => {
         setGroupReport(group)
         setEditReport(false)
-        handleBunkerFilter(month, year, group)
+        handleBunkerFilter(firstDate, currentDate, group)
     }
 
-    const handleBunkerFilter = async (month, year, group) => {
-        setMonth(month)
-        setYear(year)
-        await axios.get(`${API_URL}/api/bunkers/filter/${month}/${year}`, {
-            headers: headers
-        })
-        .then((res) => {
-            if (group){
+    const handleBunkerFilter = async (firstDate, currentDate, group) => {
+        setFirstDate(firstDate)
+        setCurrentDate(currentDate)
+        setMonth(firstDate.getMonth()+1)
+        setYear(currentDate.getFullYear())
+        if (group){
+            await axios.get(`${API_URL}/api/bunkers/filterbydate/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
+                headers: headers
+            })
+            .then((res) => {
                 setBunkers(res.data.data);
-            } else {
-                const myreport = res.data.data.filter((lo) => {
-                    return lo.surveyor == auth.data.user.name
-                })
-                setBunkers(myreport);
-            }
-        })
-        .catch((err) => {
-            console.error(err);
-        })
+                setTotalPages(Math.ceil(res.data.data.length / itemsPerPage));
+            })
+            .catch((err) => {
+                console.error(err);
+            })
+        } else {
+            await axios.get(`${API_URL}/api/bunkers/filterbyuser/${auth.data.user.id}/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
+                headers: headers
+            })
+            .then((res) => {
+                setBunkers(res.data.data);
+                setTotalPages(Math.ceil(res.data.data.length / itemsPerPage));
+            })
+            .catch((err) => {
+                console.error(err);
+            })
+        }
     }
 
     const handleDeleteBunker = async (id) => {
@@ -191,11 +227,12 @@ export default function BunkerReport() {
     }
 
     useEffect(() => {
-        handleBunkerFilter(month, year, groupReport)
+        handleBunkerFilter(firstDate, currentDate, groupReport)
     }, []);
 
-    const handleCopy = (bunker) => {
+    const handleCopy = (bunker, index) => {
         const copyText = `
+        _Bunker ${index + 1}_
         *Nama tongkang*         : ${bunker.tongkang.vessel_name}
         *Nama KRI*              : ${bunker.kri.vessel_name}
         *Lokasi Bunker*         : ${bunker.bunker_location}
@@ -213,7 +250,9 @@ export default function BunkerReport() {
         *Petugas Survey*        : ${bunker.surveyor}
         `
         console.log(copyText);
-        if (copyText){
+        let isCopy = copy(copyText);
+
+        if (isCopy){
             Toast.fire({
                 icon: 'success',
                 title: 'Copied to Clipboard'
@@ -225,6 +264,30 @@ export default function BunkerReport() {
             {/* <div className="tab-pane fade" id="nav-bunker" role="tabpanel" aria-labelledby="nav-bunker-tab" tabIndex="0"> */}
                 <h4 className="mt-3 text-center">Bunker Report</h4>
                 <div className="row mb-3 mt-3">
+                    <div className="col text-center">
+                        <DatePicker 
+                            selected={firstDate}
+                            dateFormat="dd/MM/yyyy" 
+                            onChange={(date) => {
+                                setFirstDate(date)
+                                handleBunkerFilter(date, currentDate, groupReport)
+                            }}
+                            className="form-select form-select-sm"
+                        />
+                    </div>
+                    <div className="col">
+                        <DatePicker 
+                            selected={currentDate}
+                            dateFormat="dd/MM/yyyy" 
+                            onChange={(date) => {
+                                setCurrentDate(date)
+                                handleBunkerFilter(firstDate, date, groupReport)
+                            }} 
+                            className="form-select form-select-sm" 
+                        />
+                    </div>
+                </div>
+                <div className="row mb-3 mt-3">
                     <div className="col text-start">
                         <button className={`btn btn-outline-primary btn-sm me-2 ${groupReport?'':'active'}`} type="button" onClick={groupReport? ()=>handleAllBunker(!groupReport) : ()=>{}}>My Report</button>
                         <button className={`btn btn-outline-primary btn-sm ${groupReport?'active':''}`} type="button" onClick={groupReport? ()=>{} : ()=>handleAllBunker(!groupReport)}>All Report</button>
@@ -232,24 +295,8 @@ export default function BunkerReport() {
                     <div className="col">
                         <div className="btn-toolbar justify-content-end" role="toolbar" aria-label="Toolbar with button groups">
                             <div className="btn-group me-2" role="group" aria-label="Third group">
-                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport? true : false}>{editReport? 'Cancel' : 'Edit' }</button>
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport || bunkers.length == 0? true : false}>{editReport? 'Cancel' : 'Edit' }</button>
                                 <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleExportButton()} disabled={groupReport && bunkers.length > 0 ? false : true}>Export</button>
-                            </div>
-                            <div className="btn-group" role="group" aria-label="Third group">
-                                <div className="datePicker">
-                                    <DatePicker
-                                        selected={startDate}
-                                        renderMonthContent={renderMonthContent}
-                                        showMonthYearPicker
-                                        dateFormat="MM/yyyy"
-                                        onChange={(date) => {
-                                            setStartDate(date)
-                                            handleBunkerFilter(date.getMonth()+1, date.getFullYear(), groupReport)
-                                        }}
-                                        className="form-select form-select-sm"
-                                    />
-
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -275,10 +322,10 @@ export default function BunkerReport() {
                         </thead>
                         <tbody>
                             {
-                            bunkers.length > 0
-                            ?   bunkers.map((bunker, index) => (
+                            subset.length > 0
+                            ?   subset.map((bunker, index) => (
                                 <tr key={index}>
-                                    <th scope="row">{index + 1}</th>
+                                    <th scope="row">{currentPage > 0? currentPage * 10 + (index + 1) : index + 1}</th>
                                     <td>{ bunker.bunker_location}</td>
                                     <td>{ bunker.tongkang.vessel_name}</td>
                                     <td>{ bunker.kri.vessel_name}</td>
@@ -290,7 +337,7 @@ export default function BunkerReport() {
                                     <td>{ bunker.vol_ar }</td>
                                     <td>{ bunker.surveyor }</td>
                                     <td>
-                                        <button type="button" className="btn btn-outline-primary btn-sm" onClick={()=>handleCopy(bunker)}><i className="fa fa-copy"></i></button>
+                                        <button type="button" className="btn btn-outline-primary btn-sm" onClick={()=>handleCopy(bunker, index)}><i className="fa fa-copy"></i></button>
                                     </td>
                                     <td style={editReport? {} : {display: "none"} }>
                                         <button type="button" className="btn btn-outline-warning btn-sm" onClick={()=>handleEditButton(bunker.id)}><i className="fa fa-pen"></i></button>
@@ -310,24 +357,19 @@ export default function BunkerReport() {
                         </tbody>
                     </table>
                 </div>
-
-                <nav aria-label="Page navigation example" className="mt-2 mb-2" >
-                    <ul className="pagination justify-content-center">
-                        <li className="page-item disabled">
-                        <a className="page-link" href="#" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                        </li>
-                        <li className="page-item active"><a className="page-link" href="#">1</a></li>
-                        <li className="page-item"><a className="page-link" href="#">2</a></li>
-                        <li className="page-item"><a className="page-link" href="#">3</a></li>
-                        <li className="page-item">
-                        <a className="page-link" href="#" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                        </li>
-                    </ul>
-                </nav>
+                <ReactPaginate
+                    pageCount={totalPages}
+                    onPageChange={handlePageChange}
+                    forcePage={currentPage}
+                    containerClassName=""
+                    className={"pagination justify-content-center"}
+                    pageClassName={"page-link"}
+                    previousLabel={<span aria-hidden="true">&laquo;</span>}
+                    nextLabel={<span aria-hidden="true">&raquo;</span>}
+                    previousLinkClassName={"page-link"}
+                    nextLinkClassName={"page-link"}
+                    activeClassName={"active"}
+                />
             {/* </div> */}
 
             {/* Modal LO Detail */}
