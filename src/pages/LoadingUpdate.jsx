@@ -231,7 +231,7 @@ export default function LoadingUpdate() {
     return(
         <>
         <TopLoadingBar/>
-        <div className="container">
+        <div className="container shadow-sm p-3 bg-body rounded">
             <div className="mb-3 mt-5 pt-4">
                 <h1 className="text-center">Update Loading Report</h1>
             </div>
@@ -254,7 +254,7 @@ export default function LoadingUpdate() {
                 <div className="col-12">
                     <select className="mb-3 form-select" aria-label="BBM" name="bbm" value={formData.bbm} onChange={handleChange}>
                         <option value="HSD">HSD</option>
-                        <option value="B30">B30</option>
+                        <option value="B30">B35</option>
                     </select>
                 </div>
                 <div className="col-12">

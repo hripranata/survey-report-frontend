@@ -193,3 +193,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .react-datepicker__navigation-icon {
   top: 5px !important;
 }
+
+/* .accordion-button:not(.collapsed) {
+  color: #0c63e4;
+  background-color: #FEB7EE;
+} */

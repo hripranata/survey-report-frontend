@@ -131,7 +131,7 @@ export default function BunkerReport() {
     }
 
     const handleExport = async () => {
-        await axios.get(`${API_URL}/api/exports/bunkers/${month}/${year}`, {
+        await axios.get(`${API_URL}/api/exports/bunkers/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
             headers: headers,
             responseType: 'blob', 
         })
@@ -230,24 +230,30 @@ export default function BunkerReport() {
         handleBunkerFilter(firstDate, currentDate, groupReport)
     }, []);
 
+    const numberWithDots = (x) => {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+
     const handleCopy = (bunker, index) => {
         const copyText = `
-        _Bunker ${index + 1}_
-        *Nama tongkang*         : ${bunker.tongkang.vessel_name}
-        *Nama KRI*              : ${bunker.kri.vessel_name}
-        *Lokasi Bunker*         : ${bunker.bunker_location}
-        *Mulai bunker*          : ${bunker.start.split(' ')[1].substring(0,5).replace(':','.')} / ${bunker.start.split(' ')[0].split("-").reverse().join("-")}
-        *Selesai bunker*        : ${bunker.stop.split(' ')[1].substring(0,5).replace(':','.')} / ${bunker.stop.split(' ')[0].split("-").reverse().join("-")}
-        *No LO*                             
-        ${
-            bunker.lo_details?.map((lo) => {
-                return `${lo.lo_number} : ${lo.qty}` 
-        })
+_Bunker ${index + 1}_
+*Nama tongkang*         : ${bunker.tongkang.vessel_name}
+*Nama KRI*              : ${bunker.kri.vessel_name}
+*Lokasi Bunker*         : ${bunker.bunker_location}
+*Mulai bunker*          : ${bunker.start.split(' ')[1].substring(0,5).replace(':','.')} / ${bunker.start.split(' ')[0].split("-").reverse().join(".")}
+*Selesai bunker*        : ${bunker.stop.split(' ')[1].substring(0,5).replace(':','.')} / ${bunker.stop.split(' ')[0].split("-").reverse().join(".")}
+*No LO*                 : ${ bunker.lo_details.length <= 1? bunker.lo_details[0].lo_number :
+    bunker.lo_details?.map((lo) => {
+        if (index <= 0) {
+            return `${lo.lo_number} : ${numberWithDots(lo.qty)}` 
         }
-        
-        *Volume LO*             : ${bunker.vol_lo}
-        *Volume KRI/AR*         : ${bunker.vol_ar}
-        *Petugas Survey*        : ${bunker.surveyor}
+        return `\n${lo.lo_number} : ${numberWithDots(lo.qty)}` 
+})
+}
+*Volume LO*             : ${numberWithDots(bunker.vol_lo)}
+*Volume KRI/AR*         : ${numberWithDots(bunker.vol_ar)}
+*Petugas Survey*        : ${bunker.surveyor}
         `
         console.log(copyText);
         let isCopy = copy(copyText);

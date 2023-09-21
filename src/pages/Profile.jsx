@@ -107,11 +107,11 @@ export default function Profile() {
                                 <form onSubmit={hanldeSubmit}>
                                     <div className="mb-3">
                                         <label htmlFor="inputName" className="form-label">Name</label>
-                                        <input type="text" className="form-control" name="name" value={user.name} onChange={handleChange}></input>
+                                        <input type="text" className="form-control" name="name" disabled value={user.name} onChange={handleChange}></input>
                                     </div>
                                     <div className="mb-3">
                                         <label htmlFor="inputEmail" className="form-label">NIK</label>
-                                        <input type="text" className="form-control" name="nik" value={user.nik} onChange={handleChange}></input>
+                                        <input type="text" className="form-control" name="nik" disabled value={user.nik} onChange={handleChange}></input>
                                     </div>
                                     <div className="mb-3">
                                         <label htmlFor="inputEmail" className="form-label">Email Address</label>

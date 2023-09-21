@@ -104,8 +104,13 @@ export default function LoadingSurvey() {
         const rows = [...rowsData];
         rows.splice(index, 1);
         setRowsData(rows);
-        formData.lo_details = rows
-        formData.loVol = sumQty(rows)
+        // formData.lo_details = rows
+        // formData.loVol = sumQty(rows)
+        setFormData((prevFormData) => ({ 
+            ...prevFormData, 
+            lo_details: rows,
+            loVol: sumQty(rows),
+        }));
     }
 
     const handleChangeTable = (index, evnt) => {
@@ -113,8 +118,13 @@ export default function LoadingSurvey() {
         const rowsInput = [...rowsData];
         rowsInput[index][name] = value;
         setRowsData(rowsInput);
-        formData.lo_details = rowsInput
-        formData.loVol = sumQty(rowsInput)
+        // formData.lo_details = rowsInput
+        // formData.loVol = sumQty(rowsInput)
+        setFormData((prevFormData) => ({ 
+            ...prevFormData, 
+            lo_details: rowsInput,
+            loVol: sumQty(rowsInput),
+        }));
     }
 
     const handleChange = (event) => {
@@ -189,12 +199,32 @@ export default function LoadingSurvey() {
         }));
     };
 
-    const [loadingScrape, setLoadingScrape] = useState([])
+    const [loadingScrape, setLoadingScrape] = useState(
+        {
+            data: [],
+            status: null
+        }
+    )
 
     const addFromScrape = async () => {
+        setLoadingScrape(loadingScrape)
         await axios.get('http://localhost:3500/api/ibunker', { headers: headers })
         .then((res) => {
-            setLoadingScrape(res.data.reports)
+            if (res.data.vessel_queue.length > 0) {
+                // setLoadingScrape(res.data.vessel_queue)
+                setLoadingScrape((prev) => ({ 
+                    ...prev,
+                    data: res.data.vessel_queue,
+                    status: 1 
+                }));
+            } else {
+                // setLoadingScrape([{ data: 0}])
+                setLoadingScrape((prev) => ({ 
+                    ...prev,
+                    data: [],
+                    status: 0 
+                }));
+            }
         })
         .catch((err) => {
             console.error(err);
@@ -252,7 +282,7 @@ export default function LoadingSurvey() {
                     <div className="col-12">
                         <select className="mb-3 form-select" aria-label="BBM" name="bbm" value={formData.bbm} onChange={handleChange}>
                             <option value="HSD">HSD</option>
-                            <option value="B30">B30</option>
+                            <option value="B30">B35</option>
                         </select>
                     </div>
                     <div className="col-12">
@@ -282,10 +312,10 @@ export default function LoadingSurvey() {
                             <thead className="text-center">
                                 <tr>
                                     <th colSpan="2">LO Number</th>
-                                    <td className="align-middle">
+                                    <th className="align-middle" width="100px">
                                         <button type="button" className="btn btn-sm btn-primary me-2" data-bs-toggle="modal" data-bs-target="#loDetailLoadingModal" onClick={addFromScrape}>iB</button>
                                         <button type="button" className="btn btn-sm btn-success" onClick={addTableRows}>+</button>
-                                    </td>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -321,8 +351,8 @@ export default function LoadingSurvey() {
                     </div>
                     <div className="modal-body">
                         <div className="accordion" id="accordionExample">
-                            { loadingScrape.length > 0 ?
-                                loadingScrape?.map((loading, index) => (
+                            { loadingScrape?.status == 1 ?
+                                loadingScrape?.data.map((loading, index) => (
                                     
                                     <div className="accordion-item" key={index}>
                                         <h2 className="accordion-header">
@@ -359,7 +389,12 @@ export default function LoadingSurvey() {
                                         </div>
                                     </div>
                                 ))
-                                :   <div className="text-center">
+                                : loadingScrape?.status == 0 ?
+                                    <div className="text-center">
+                                        <p>Vessel Not Found !</p>
+                                    </div>   
+                                :
+                                    <div className="text-center">
                                         <div className="spinner-border text-primary" role="status">
                                             <span className="visually-hidden">Loading...</span>
                                         </div>

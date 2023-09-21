@@ -133,7 +133,7 @@ export default function LoadingReport() {
     }
 
     const handleExport = async () => {
-        await axios.get(`${API_URL}/api/exports/loadings/${month}/${year}`, {
+        await axios.get(`${API_URL}/api/exports/loadings/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
             headers: headers,
             responseType: 'blob', 
         })
@@ -231,24 +231,31 @@ export default function LoadingReport() {
         handleLoadingFilter(firstDate, currentDate, groupReport)
     }, []);
 
+    const numberWithDots = (x) => {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
     const handleCopy = (loading) => {
         const copyText = `
-        _Loading 00_
-        *Tanggal LO*            : ${loading.lo_date}
-        *Nama tongkang*         : ${loading.tongkang.vessel_name}
-        *Jenis BBM*             : ${loading.bbm}
-        *Mulai loading*         : ${loading.start.split(' ')[1].substring(0,5).replace(':','.')} / ${loading.start.split(' ')[0].split("-").reverse().join("-")}
-        *Selesai Loading*       : ${loading.stop.split(' ')[1].substring(0,5).replace(':','.')} / ${loading.stop.split(' ')[0].split("-").reverse().join("-")}
-        *No LO*                             
-        ${
-            loading.lo_details?.map((lo) => {
-                return `${lo.lo_number} : ${lo.qty}` 
-        })
+_Loading 00_
+*Tanggal LO*            : ${loading.lo_date.split("-").reverse().join(".")}
+*Nama tongkang*         : ${loading.tongkang.vessel_name}
+*Jenis BBM*             : ${loading.bbm}
+*Mulai loading*         : ${loading.start.split(' ')[1].substring(0,5).replace(':','.')} / ${loading.start.split(' ')[0].split("-").reverse().join(".")}
+*Selesai Loading*       : ${loading.stop.split(' ')[1].substring(0,5).replace(':','.')} / ${loading.stop.split(' ')[0].split("-").reverse().join(".")}
+*No LO*                             
+${
+    loading.lo_details?.map((lo, index) => {
+        if (index <= 0) {
+            return `${lo.lo_number} : ${numberWithDots(lo.qty)}`
         }
-        
-        *Volume LO*             : ${loading.vol_lo}
-        *AL/ Volume Tongkang*   : ${loading.vol_al}
-        *Petugas Survey*        : ${loading.surveyor}
+        return `\n${lo.lo_number} : ${numberWithDots(lo.qty)}` 
+    })
+}
+
+*Volume LO*             : ${numberWithDots(loading.vol_lo)}
+*AL/ Volume Tongkang*   : ${numberWithDots(loading.vol_al)}
+*Petugas Survey*        : ${loading.surveyor}
         `
         console.log(copyText);
         let isCopy = copy(copyText);
