@@ -15,21 +15,33 @@ export default function LoadingReport() {
     const [loDetail, setLoDetail] = useState([])
     const [editReport, setEditReport] = useState(false)
     const [groupReport, setGroupReport] = useState(false)
+
+    const [sort, setSort] = useState('desc');
+    const handleSorting = () => {
+        if (sort == 'desc') {
+            setSort('asc')
+            setLoadings(loadings.reverse())
+        } else {
+            setSort('desc')
+            setLoadings(loadings.reverse())
+        }
+    }
+
     const now = new Date()
 
     const [firstDate, setFirstDate] = useState(new Date(now.getFullYear(), now.getMonth(), 1));
     const [currentDate, setCurrentDate] = useState(new Date());
     const dateFormat = (date) => {
         let day = date.getDate();
-        let month = date.getMonth();
+        let month = date.getMonth() + 1;
         let year = date.getFullYear();
-
+        
         if (day < 10) {
             day = `0${day}`;
         }
         
         if (month < 10) {
-            month = `0${month+1}`;
+            month = `0${month}`;
         }
         
         return `${year}-${month}-${day}`;
@@ -303,9 +315,10 @@ ${
                     </div>
                     <div className="col">
                         <div className="btn-toolbar justify-content-end" role="toolbar" aria-label="Toolbar with button groups">
-                            <div className="btn-group me-2" role="group" aria-label="First group">
-                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport || loadings.length == 0 ? true : false}>{editReport? 'Cancel' : 'Edit' }</button>
-                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleExportButton()} disabled={groupReport && loadings.length > 0 ? false : true}>Export</button>
+                            <div className="btn-group" role="group" aria-label="First group">
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport || loadings.length == 0 ? true : false}><i className="fa fa-pen"></i> {editReport? 'Cancel' : 'Edit' }</button>
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleSorting()}><i className="fa fa-sort"></i> {sort == 'desc'? 'Oldest':'Newest'}</button>
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleExportButton()} disabled={groupReport && loadings.length > 0 ? false : true}><i className="fa fa-download"></i> Export</button>
                             </div>
                         </div>
                     </div>
@@ -349,7 +362,7 @@ ${
                                         <button type="button" className="btn btn-outline-primary btn-sm" onClick={()=>handleCopy(loading)}><i className="fa fa-copy"></i></button>
                                     </td>
                                     <td style={editReport? {} : {display: "none"} }>
-                                        <button type="button" className="btn btn-outline-warning btn-sm" onClick={()=>handleEditButton(loading.id)}><i className="fa fa-pen"></i></button>
+                                        <button type="button" className="btn btn-outline-secondary btn-sm" onClick={()=>handleEditButton(loading.id)}><i className="fa fa-pen"></i></button>
                                     </td>
                                     <td style={editReport? {} : {display: "none"} }><button type="button" className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteButton(loading.id)}><i className="fa fa-trash"></i></button></td>
                                 </tr>

@@ -41,7 +41,12 @@ export default function Home() {
     const [month, setMonth] = useState(now.getMonth()+1)
     const [year, setYear] = useState(now.getFullYear())
     
-    const [orderList, setOrderList] = useState([])
+    const [orderList, setOrderList] = useState(
+        {
+            data: [],
+            status: null
+        }
+    )
     const handleOrderList = async (month, year) => {
         setMonth(month)
         setYear(year)
@@ -49,7 +54,19 @@ export default function Home() {
             headers: headers
         })
         .then((res) => {
-            setOrderList(res.data.data);
+            if (res.data.data.length > 0) {
+                setOrderList((prev) => ({ 
+                    ...prev,
+                    data: res.data.data,
+                    status: 1 
+                }));
+            } else {
+                setOrderList((prev) => ({ 
+                    ...prev,
+                    data: [],
+                    status: 0
+                }));
+            }
         })
         .catch((err) => {
             console.error(err);
@@ -116,9 +133,11 @@ export default function Home() {
 
                 </div>
 
+                <h2 className='mt-3'><strong>Vessel Order List</strong></h2>
+
                 <div className="accordion mt-3" id="accordionExample">
-                    { orderList.length > 0 ?
-                        orderList?.map((order, index) => (
+                    { orderList?.status == 1 ?
+                        orderList?.data.map((order, index) => (
                             
                             <div className="accordion-item" key={index}>
                                 <h2 className="accordion-header">
@@ -166,7 +185,15 @@ export default function Home() {
                                 </div>
                             </div>
                         ))
-                        :   <div className="text-center">
+                        : orderList?.status == 0 ?
+                            <div className="text-center">
+                                {/* <p>Order List !</p> */}
+                                <div className="alert alert-danger mb-0">
+                                    Data Belum Tersedia !
+                                </div>
+                            </div>   
+                        :
+                            <div className="text-center">
                                 <div className="spinner-border text-primary" role="status">
                                     <span className="visually-hidden">Loading...</span>
                                 </div>

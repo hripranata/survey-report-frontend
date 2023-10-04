@@ -15,13 +15,25 @@ export default function BunkerReport() {
     const [loDetail, setLoDetail] = useState([])
     const [editReport, setEditReport] = useState(false)
     const [groupReport, setGroupReport] = useState(false)
+
+    const [sort, setSort] = useState('desc');
+    const handleSorting = () => {
+        if (sort == 'desc') {
+            setSort('asc')
+            setBunkers(bunkers.reverse())
+        } else {
+            setSort('desc')
+            setBunkers(bunkers.reverse())
+        }
+    }
+
     const now = new Date()
 
     const [firstDate, setFirstDate] = useState(new Date(now.getFullYear(), now.getMonth(), 1));
     const [currentDate, setCurrentDate] = useState(new Date());
     const dateFormat = (date) => {
         let day = date.getDate();
-        let month = date.getMonth();
+        let month = date.getMonth() + 1;
         let year = date.getFullYear();
 
         if (day < 10) {
@@ -29,7 +41,7 @@ export default function BunkerReport() {
         }
         
         if (month < 10) {
-            month = `0${month+1}`;
+            month = `0${month}`;
         }
         
         return `${year}-${month}-${day}`;
@@ -122,7 +134,7 @@ export default function BunkerReport() {
             headers: headers
         })
         .then(() => {
-            handleBunkerFilter(month, groupReport)
+            handleBunkerFilter(firstDate, currentDate, groupReport)
             setEditReport(false)
         })
         .catch((err) => {
@@ -300,9 +312,10 @@ _Bunker ${index + 1}_
                     </div>
                     <div className="col">
                         <div className="btn-toolbar justify-content-end" role="toolbar" aria-label="Toolbar with button groups">
-                            <div className="btn-group me-2" role="group" aria-label="Third group">
-                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport || bunkers.length == 0? true : false}>{editReport? 'Cancel' : 'Edit' }</button>
-                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleExportButton()} disabled={groupReport && bunkers.length > 0 ? false : true}>Export</button>
+                            <div className="btn-group" role="group" aria-label="Third group">
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport || bunkers.length == 0? true : false}><i className="fa fa-pen"></i> {editReport? 'Cancel' : 'Edit'}</button>
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleSorting()}><i className="fa fa-sort"></i> {sort == 'desc'? 'Oldest':'Newest'}</button>
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleExportButton()} disabled={groupReport && bunkers.length > 0 ? false : true}><i className="fa fa-download"></i> Export</button>
                             </div>
                         </div>
                     </div>
@@ -346,7 +359,7 @@ _Bunker ${index + 1}_
                                         <button type="button" className="btn btn-outline-primary btn-sm" onClick={()=>handleCopy(bunker, index)}><i className="fa fa-copy"></i></button>
                                     </td>
                                     <td style={editReport? {} : {display: "none"} }>
-                                        <button type="button" className="btn btn-outline-warning btn-sm" onClick={()=>handleEditButton(bunker.id)}><i className="fa fa-pen"></i></button>
+                                        <button type="button" className="btn btn-outline-secondary btn-sm" onClick={()=>handleEditButton(bunker.id)}><i className="fa fa-pen"></i></button>
                                     </td>
 
                                     <td style={editReport? {} : {display: "none"} }><button type="button" className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteButton(bunker.id)}><i className="fa fa-trash"></i></button></td>
