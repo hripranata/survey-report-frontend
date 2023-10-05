@@ -90,24 +90,25 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   transition: .3s linear all;
 }
 
-.card-counter.primary{
-  background-color: #007bff;
-  color: #FFF;
+/* .card-counter.coloring{
+  background-color: #FAFAFA;
+  color: #3A4138;
+} */
+
+.card-body.primary i{
+  color: #007bff;
 }
 
-.card-counter.danger{
-  background-color: #ef5350;
-  color: #FFF;
+.card-body.danger i{
+  color: #ef5350;
 }  
 
-.card-counter.success{
-  background-color: #66bb6a;
-  color: #FFF;
+.card-body.success i{
+  color: #66bb6a;
 }  
 
-.card-counter.info{
-  background-color: #26c6da;
-  color: #FFF;
+.card-body.info i{
+  color: #26c6da;
 }  
 
 .card-counter i{
@@ -132,6 +133,11 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   /* opacity: 0.5; */
   display: block;
   font-size: 18px;
+}
+
+.card .hour {
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
 }
 
 /* sweetalert style */

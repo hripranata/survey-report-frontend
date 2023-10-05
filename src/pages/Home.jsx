@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom';
 import TopLoadingBar from "../components/TopLoadingBar";
 import { useAuth } from "../context/Auth";
 import axios from "axios";
 
 export default function Home() {
+    const navigate = useNavigate()
     const { auth, setProgress } = useAuth();
     const [loadingCounter, setLoadingCounter] = useState({});
     const [bunkerCounter, setBunkerCounter] = useState({});
@@ -88,6 +90,10 @@ export default function Home() {
         })
     }
 
+    const handleViewBunkerReport = () => {
+        return navigate('/report', {state: {report: 1}});
+    }
+
     useEffect(() => {
         handleCounter()
         handleOrderList(month, year)
@@ -98,10 +104,10 @@ export default function Home() {
         <>
             <TopLoadingBar/>
             <div className="container mt-5 pt-4">
-                <div className="row">
+                {/* <div className="row">
                     <div className="col-md-3" style={{position: "relative"}}>
                         <div className="card-counter primary">
-                            <i className="fa fa-ship"></i>
+                            <i className="fa fa-ship fa-3x"></i>
                             <span className="count-numbers">{loadingCounter.total_loading}</span>
                             <span className="count-name">Total Loadings</span>
                         </div>
@@ -109,7 +115,7 @@ export default function Home() {
 
                     <div className="col-md-3" style={{position: "relative"}}>
                         <div className="card-counter danger">
-                            <i className="fa fa-anchor"></i>
+                            <i className="fa fa-anchor fa-3x"></i>
                             <span className="count-numbers">{bunkerCounter.total_bunker}</span>
                             <span className="count-name">Total Bunker</span>
                         </div>
@@ -117,7 +123,7 @@ export default function Home() {
 
                     <div className="col-md-3" style={{position: "relative"}}>
                         <div className="card-counter info">
-                            <i className="fa fa-oil-can"></i>
+                            <i className="fa fa-oil-can fa-3x"></i>
                             <span className="count-numbers">{loadingCounter.total_lo} L</span>
                             <span className="count-name">Total LO</span>
                         </div>
@@ -125,13 +131,106 @@ export default function Home() {
 
                     <div className="col-md-3" style={{position: "relative"}}>
                         <div className="card-counter success">
-                            <i className="fa fa-gas-pump"></i>
+                            <i className="fa fa-gas-pump fa-3x"></i>
                             <span className="count-numbers">{bunkerCounter.total_ar} L</span>
                             <span className="count-name">Total AR</span>
                         </div>
                     </div>
 
+                </div> */}
+
+                <div className="mx-auto my-1 p-2" style={{width: "auto"}}>
+                    
+                    {/* <div className="card panel-card">
+                    <div className="card-body text-dark" style={{backgroundColor: "#fafafa"}}> */}
+                        <div className="row">
+                        <div className="col-6 p-1">
+                            <div className="card border-primary">
+                            <div className="card-body primary pb-0">
+                                <i className="fas fa-ship fa-3x pb-4"></i>
+                                <div className="d-flex justify-content-between">
+                                    <p className="mb-0 h5">{loadingCounter.total_loading}</p>
+                                    <p className="mb-0 hour">Vessel</p>
+                                </div>
+                            </div>
+                            <hr className='text-primary'/>
+                            <div className="card-body pt-0">
+                                <div className="d-flex justify-content-between">
+                                    <h6 className="font-weight-bold mt-2 mb-1">Total Loading</h6>
+                                    <Link to="/loadingsurvey">
+                                        <button type='button' className="btn btn-outline-primary">Survey</button>
+                                    </Link>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        <div className="col-6 p-1">
+                            <div className="card border-primary">
+                            <div className="card-body danger pb-0">
+                                <i className="fas fa-anchor fa-3x pb-4"></i>
+                                <div className="d-flex justify-content-between">
+                                    <p className="mb-0 h5">{bunkerCounter.total_bunker}</p>
+                                    <p className="mb-0 hour">KRI</p>
+                                </div>
+                            </div>
+                            <hr className='text-primary' />
+                            <div className="card-body pt-0">
+                                <div className="d-flex justify-content-between">
+                                    <h6 className="font-weight-bold mt-2 mb-1">Total Bunker</h6>
+                                    <Link to="/bunkersurvey">
+                                        <button type='button' className="btn btn-outline-primary">Survey</button>
+                                    </Link>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                        <div className="row">
+                        <div className="col-6 p-1">
+                            <div className="card border-primary">
+                            <div className="card-body success pb-0">
+                                <i className="fas fa-oil-can fa-3x pb-4"></i>
+                                <div className="d-flex justify-content-between">
+                                <p className="mb-0 h5">{loadingCounter.total_lo}</p>
+                                <p className="mb-0 hour">Liter</p>
+                                </div>
+                            </div>
+                            <hr className='text-primary' />
+                            <div className="card-body pt-0">
+                                <div className="d-flex justify-content-between">
+                                    <h6 className="font-weight-bold mt-2 mb-1">LO Volume</h6>
+                                    <Link to="/report">
+                                        <button type='button' className="btn btn-outline-primary">View Report</button>
+                                    </Link>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        <div className="col-6 p-1">
+                            <div className="card border-primary">
+                            <div className="card-body info pb-0">
+                                <i className="fas fa-gas-pump fa-3x pb-4"></i>
+                                <div className="d-flex justify-content-between">
+                                <p className="mb-0 h5">{bunkerCounter.total_ar}</p>
+                                <p className="mb-0 hour">Liter</p>
+                                </div>
+                            </div>
+                            <hr className='text-primary' />
+                            <div className="card-body pt-0">
+                                <div className="d-flex justify-content-between">
+                                    <h6 className="font-weight-bold mt-2 mb-1">AR Volume</h6>
+                                    <button type='button' className="btn btn-outline-primary" onClick={()=>handleViewBunkerReport()}>View Report</button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+
+                    {/* </div>
+                    </div> */}
+                    
                 </div>
+
 
                 <h2 className='mt-3'><strong>Vessel Order List</strong></h2>
 
