@@ -6,7 +6,7 @@ import axios from "axios";
 
 export default function Home() {
     const navigate = useNavigate()
-    const { auth, setProgress } = useAuth();
+    const { auth, setAuth, setProgress } = useAuth();
     const [loadingCounter, setLoadingCounter] = useState({});
     const [bunkerCounter, setBunkerCounter] = useState({});
     const now = new Date()
@@ -27,6 +27,9 @@ export default function Home() {
         })
         .catch((err) => {
             console.error(err);
+            if (err.response.status === 401) {
+                setAuth(null)
+            }
         })
         await axios.get(`${API_URL}/api/bunkers/count/${now.getMonth()+1}`, {
             headers: headers
@@ -36,6 +39,9 @@ export default function Home() {
         })
         .catch((err) => {
             console.error(err);
+            if (err.response.status === 401) {
+                setAuth(null)
+            }
         })
     }
 
@@ -72,6 +78,9 @@ export default function Home() {
         })
         .catch((err) => {
             console.error(err);
+            if (err.response.status === 401) {
+                setAuth(null)
+            }
         })
     }
 

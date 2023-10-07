@@ -8,12 +8,15 @@ import BunkerSurvey from './pages/BunkerSurvey'
 import Report from './pages/Report'
 import Profile from "./pages/Profile"
 import Login from "./pages/Login"
+import ForgotPassword from "./pages/ForgotPassword"
+import ResetPassword from "./pages/ResetPassword"
 import Unauthorized from './pages/Unauthorized'
 import Layout from './components/Layout';
 import LoadingUpdate from './pages/LoadingUpdate'
 import BunkerUpdate from './pages/BunkerUpdate'
 import Setting from './pages/Setting'
 import TopLoadingBar from './components/TopLoadingBar'
+import PassswordChange from './pages/PasswordChange'
 
 const ROLES = {
   'User': 'user',
@@ -41,11 +44,14 @@ function App() {
                   <Route path="/bunkersurvey" element={<BunkerSurvey />} />
                   <Route path="/report" element={<Report />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/password_change" element={<PassswordChange />} />
               </Route>
               <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
                   <Route path="/setting" element={<Setting />} />
               </Route>
               <Route path="/login" element={<Login />} />
+              <Route path="/forgot_password" element={<ForgotPassword />} />
+              <Route path="/reset_password" element={<ResetPassword />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
               <Route path="*" element={<Navigate to="/login" />} />
 

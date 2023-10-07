@@ -9,7 +9,7 @@ import copy from "copy-to-clipboard";
 import ReactPaginate from 'react-paginate';
 
 export default function BunkerReport() {
-    const { auth } = useAuth();
+    const { auth, setAuth } = useAuth();
     const navigate = useNavigate();
     const [bunkers, setBunkers] = useState([])
     const [loDetail, setLoDetail] = useState([])
@@ -114,6 +114,9 @@ export default function BunkerReport() {
             })
             .catch((err) => {
                 console.error(err);
+                if (err.response.status === 401) {
+                    setAuth(null)
+                }
             })
         } else {
             await axios.get(`${API_URL}/api/bunkers/filterbyuser/${auth.data.user.id}/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
@@ -125,6 +128,9 @@ export default function BunkerReport() {
             })
             .catch((err) => {
                 console.error(err);
+                if (err.response.status === 401) {
+                    setAuth(null)
+                }
             })
         }
     }

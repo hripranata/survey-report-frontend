@@ -1,7 +1,7 @@
 import SILogo from '/logo.png'
 import { useState } from "react"
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/Auth";
 import Swal from 'sweetalert2'
 
@@ -40,7 +40,7 @@ export default function Login() {
                         password: password,
                     })
                     .then((response) => {
-                         localStorage.setItem('user', JSON.stringify(response.data))
+                        //  localStorage.setItem('user', JSON.stringify(response.data))
                          setAuth(response.data)
                          Toast.fire({
                             icon: 'success',
@@ -78,7 +78,10 @@ export default function Login() {
                     <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer`} />
                     <label htmlFor="floatingPassword">Password</label>
                 </div>
-                <button className="btn btn-primary w-100 py-2 my-3" type="submit">Login</button>
+                <div className='form-check text-start my-3 p-0'>
+                    <Link to="/forgot_password">Forgot Password?</Link>
+                </div>
+                <button className="btn btn-primary w-100 py-2 my-1" type="submit">Login</button>
             </form>
             <p className="mt-5 mb-3 text-body-secondary text-center">2023 &copy; PT Surveyor Indonesia</p>
             </div>

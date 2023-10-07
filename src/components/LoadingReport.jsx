@@ -9,7 +9,7 @@ import copy from "copy-to-clipboard";
 import ReactPaginate from 'react-paginate';
 
 export default function LoadingReport() {
-    const { auth } = useAuth();
+    const { auth, setAuth } = useAuth();
     const navigate = useNavigate();
     const [loadings, setLoadings] = useState([])
     const [loDetail, setLoDetail] = useState([])
@@ -116,6 +116,9 @@ export default function LoadingReport() {
             })
             .catch((err) => {
                 console.error(err);
+                if (err.response.status === 401) {
+                    setAuth(null)
+                }
             })
         } else {
             await axios.get(`${API_URL}/api/loadings/filterbyuser/${auth.data.user.id}/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
@@ -127,6 +130,9 @@ export default function LoadingReport() {
             })
             .catch((err) => {
                 console.error(err);
+                if (err.response.status === 401) {
+                    setAuth(null)
+                }
             })
         }
     }
