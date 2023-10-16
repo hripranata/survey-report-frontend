@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import axios from "axios";
+import axios from '../services/axios';
 import { useAuth } from "../context/Auth";
 import { useNavigate, useParams } from 'react-router-dom'
 import Select from 'react-select'
@@ -55,8 +55,6 @@ export default function BunkerUpdate() {
         'Authorization' : 'Bearer ' + auth.data.token
     }
 
-    const API_URL = "http://localhost:8000";
-
     const { id } = useParams();
 
     const [formData, setFormData] = useState({
@@ -75,7 +73,7 @@ export default function BunkerUpdate() {
     })
 
     const fetchBunkerById = async () => {
-        await axios.get(`${API_URL}/api/bunkers/${id}`, {
+        await axios.get(`/api/bunkers/${id}`, {
             headers: headers
         })
         .then((res) => {
@@ -133,7 +131,7 @@ export default function BunkerUpdate() {
             // surveyor: auth.data.user.name
         }
         
-        await axios.put(`${API_URL}/api/bunkers/${id}`, bunkerData, { headers: headers })
+        await axios.put(`/api/bunkers/${id}`, bunkerData, { headers: headers })
         .then(() => {
             Toast.fire({
                 icon: 'success',
@@ -152,7 +150,7 @@ export default function BunkerUpdate() {
 
     // Vessel Select Option
     const handleVesselList = async () => {
-        await axios.get(`${API_URL}/api/vessels/SPOB`, { headers: headers })
+        await axios.get(`/api/vessels/SPOB`, { headers: headers })
         .then((res) => {
             setTongkangOption(changeVesselOption(res.data.data))
         })
@@ -160,7 +158,7 @@ export default function BunkerUpdate() {
             console.error(err);
         })
 
-        await axios.get(`${API_URL}/api/vessels/KRI`, { headers: headers })
+        await axios.get(`/api/vessels/KRI`, { headers: headers })
         .then((res) => {
             setKriOption(changeVesselOption(res.data.data))
         })
@@ -196,7 +194,7 @@ export default function BunkerUpdate() {
 
     // LO Select Option
     const handleLoNumberList = async (tongkang_id, old_lo) => {
-        return await axios.get(`${API_URL}/api/lodetails/filter/${tongkang_id}`, { headers: headers })
+        return await axios.get(`/api/lodetails/filter/${tongkang_id}`, { headers: headers })
         .then((res) => {
             const new_lo = changeLoValue(res.data.data);
             const old_loNumber = changeLoValue(old_lo);
@@ -296,7 +294,6 @@ export default function BunkerUpdate() {
                     </div>
                     <div className="col-12 mb-3">
                         <CreatableSelect 
-                            isClearable
                             value={location_initial_option()}
                             placeholder= "Pilih Lokasi Bunker"
                             name="bunker_location"

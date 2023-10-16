@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import axios from "axios";
+import axios from '../services/axios';
 import { useAuth } from "../context/Auth";
 import { useNavigate } from 'react-router-dom'
 import Select from 'react-select'
@@ -54,8 +54,6 @@ export default function BunkerSurvey() {
         'Authorization' : 'Bearer ' + auth.data.token
     }
 
-    const API_URL = "http://localhost:8000";
-
     const [formData, setFormData] = useState({
         tongkang_id: 0,
         kri_id: 0,
@@ -101,7 +99,7 @@ export default function BunkerSurvey() {
             // surveyor: auth.data.user.name
         }
         
-        await axios.post(`${API_URL}/api/bunkers`, bunkerData, { headers: headers })
+        await axios.post(`/api/bunkers`, bunkerData, { headers: headers })
         .then(() => {
             Toast.fire({
                 icon: 'success',
@@ -120,7 +118,7 @@ export default function BunkerSurvey() {
 
     // Vessel Select Option
     const handleVesselList = async () => {
-        await axios.get(`${API_URL}/api/vessels/SPOB`, { headers: headers })
+        await axios.get(`/api/vessels/SPOB`, { headers: headers })
         .then((res) => {
             setTongkangOption(changeVesselOption(res.data.data))
         })
@@ -128,7 +126,7 @@ export default function BunkerSurvey() {
             console.error(err);
         })
 
-        await axios.get(`${API_URL}/api/vessels/KRI`, { headers: headers })
+        await axios.get(`/api/vessels/KRI`, { headers: headers })
         .then((res) => {
             setKriOption(changeVesselOption(res.data.data))
         })
@@ -161,7 +159,7 @@ export default function BunkerSurvey() {
 
     // LO Select Option
     const handleLoNumberList = async (tongkang_id) => {
-        await axios.get(`${API_URL}/api/lodetails/filter/${tongkang_id}`, { headers: headers })
+        await axios.get(`/api/lodetails/filter/${tongkang_id}`, { headers: headers })
         .then((res) => {
             setloNumberOption(changeLoNumberOption(res.data.data))
         })
@@ -246,7 +244,6 @@ export default function BunkerSurvey() {
                     </div>
                     <div className="col-12 mb-3">
                         <CreatableSelect 
-                            isClearable
                             placeholder= "Pilih Lokasi Bunker"
                             name="bunker_location"
                             options={bunkerLocationOptions}

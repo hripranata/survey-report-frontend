@@ -1,9 +1,10 @@
 import SILogo from '/logo.png'
 import { useState, useEffect } from "react"
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import axios from '../services/axios';
+import { useNavigate, useParams } from "react-router-dom";
 import Swal from 'sweetalert2'
 import { useAuth } from "../context/Auth";
+import TopLoadingBar from "../components/TopLoadingBar";
 
 export default function ResetPasssword() {
     const { setProgress } = useAuth();
@@ -19,21 +20,26 @@ export default function ResetPasssword() {
         timer: 1250,
         timerProgressBar: true
     })
+
+    const { token } = useParams();
+    const [email, setEmail] = useState("")
     const [password, setPassword] = useState("");
-    const [cpassword, setCPassword] = useState("");
+    const [password_confirmation, setPasswordConfirmation] = useState("");
     const [showPass, setShowPass] = useState(false)
     const handlePass = () => {
         setShowPass(!showPass)
     }
-    const API_URL = "http://localhost:8000";
 
     const handlePasswordReset = (e) => {
         e.preventDefault();
-        if (password.length > 0 && cpassword.length > 0 && cpassword === password) {
-            axios.get(API_URL + "/sanctum/csrf-cookie").then(() => {
+        if (password.length > 0 && password_confirmation.length > 0 && password_confirmation === password) {
+            axios.get("/sanctum/csrf-cookie").then(() => {
                 axios
-                    .post(API_URL + "/api/reset_password", {
+                    .post("/api/reset_password", {
+                        token: token,
+                        email: email,
                         password: password,
+                        password_confirmation: password_confirmation
                     })
                     .then(() => {
                         Toast.fire({
@@ -44,8 +50,9 @@ export default function ResetPasssword() {
     
                     })
                     .catch(function () {
+                        setEmail("")
                         setPassword("")
-                        setCPassword("")
+                        setPasswordConfirmation("")
                         Toast.fire({
                             icon: 'error',
                             title: 'Error to reset password!'
@@ -55,11 +62,37 @@ export default function ResetPasssword() {
         }
     }
 
+    const [valid, setValid] = useState(true)
+    console.log(valid);
+
+    const tokenValidation = () => {
+        axios.get("/sanctum/csrf-cookie").then(() => {
+            axios
+                .post("/api/validate_token", {
+                    token: token,
+                })
+                .then((res) => {
+                    console.log(res.data);
+                    if (res.data.success == true) {
+                        setValid(true)
+                    } else {
+                        setValid(false)
+                    }
+                })
+                .catch(() => {
+                    setValid(false)
+                });
+            });
+    }
+
     useEffect(() => {
+        tokenValidation()
         setProgress(100)
     }, []);
     return (
         <>
+            <TopLoadingBar/>
+            {valid? 
             <div className="form-login">
                 <form onSubmit={handlePasswordReset}>
                     <div className="text-center">
@@ -68,12 +101,16 @@ export default function ResetPasssword() {
                     <h1 className="h3 mb-4 fw-normal text-center">Reset Your Password</h1>
 
                     <div className="form-floating">
+                        <input type="email" className="form-control" name="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required></input>
+                        <label htmlFor="floatingEmail">Email</label>
+                    </div>
+                    <div className="form-floating">
                         <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required></input>
                         <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer`} />
                         <label htmlFor="floatingPassword">New Password</label>
                     </div>
                     <div className="form-floating">
-                        <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="cpassword" value={cpassword} onChange={(e) => setCPassword(e.target.value)} placeholder="Confirm New Password" required></input>
+                        <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="password_confirmation" value={password_confirmation} onChange={(e) => setPasswordConfirmation(e.target.value)} placeholder="Confirm New Password" required></input>
                         <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer`} />
                         <label htmlFor="floatingPassword">Confirm New Password</label>
                     </div>
@@ -81,6 +118,15 @@ export default function ResetPasssword() {
                 </form>
                 <p className="mt-5 mb-3 text-body-secondary text-center">2023 &copy; PT Surveyor Indonesia</p>
             </div>
+            :
+            <div className="container mt-5">
+                <div className="text-center">
+                    <div className="alert alert-danger mb-0">
+                        Sorry link was expired !
+                    </div>
+                </div>   
+            </div>
+            }
         </>
     )
 }

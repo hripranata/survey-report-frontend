@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react"
-import axios from "axios";
+import axios from '../services/axios';
 import { useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2'
 import { useAuth } from "../context/Auth";
 import TopLoadingBar from "../components/TopLoadingBar";
 
-export default function PassswordChange() {
+export default function UpdatePasssword() {
     const { auth, setProgress } = useAuth();
     const navigate = useNavigate();
     const Toast = Swal.mixin({
@@ -32,13 +32,12 @@ export default function PassswordChange() {
         'Accept' : 'application/json',
         'Authorization' : 'Bearer ' + auth.data.token
     }
-    const API_URL = "http://localhost:8000";
 
     const handlePasswordChange = (e) => {
         e.preventDefault();
         Swal.fire({
             title: 'Are you sure to change your password !',
-            showDenyButton: false,
+            showDenyButton: true,
             showCancelButton: false,
             confirmButtonText: 'Yes',
             denyButtonText: 'No',
@@ -51,28 +50,37 @@ export default function PassswordChange() {
             }
           }).then((result) => {
             if (result.isConfirmed) {
-                if (password.length > 0 && npassword.length > 0 && cpassword.length > 0 && cpassword === password && password === auth.data.user.password) {
-                        axios
-                            .post(API_URL + `/api/change_password/${auth.data.user.id}`, {
-                                // password: password,
-                                npassword: npassword,
-                            }, { headers: headers })
-                            .then(() => {
-                                Toast.fire({
-                                    icon: 'success',
-                                    title: 'Success change password !'
-                                    })
-                                navigate("/home")
-            
-                            })
-                            .catch(function () {
-                                setPassword("")
-                                setCPassword("")
-                                Toast.fire({
-                                    icon: 'error',
-                                    title: 'Error to change password!'
-                                  })
-                            });
+                if (password.length > 0 && npassword.length > 0 && cpassword.length > 0 && cpassword === npassword) {
+                    axios
+                        .post(`/api/users/update_password`, {
+                            nik: auth.data.user.nik,
+                            password: password,
+                            npassword: npassword,
+                        }, { headers: headers })
+                        .then(() => {
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Success change password !'
+                                })
+                            navigate("/home")
+        
+                        })
+                        .catch((err) => {
+                            console.log(err);
+
+                            setPassword("")
+                            setNPassword("")
+                            setCPassword("")
+                            Toast.fire({
+                                icon: 'error',
+                                title: 'Error to change password!'
+                                })
+                        });
+                } else {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Confirmation password not match!'
+                        })
                 }
             }
           })
@@ -84,27 +92,6 @@ export default function PassswordChange() {
     return (
         <>
             <TopLoadingBar/>
-            {/* <div className="form-login">
-                <form>
-                    <div className="text-center">
-                        <img className="mb-5" src={SILogo} alt="" height=   "36" width="282"></img>
-                    </div>
-                    <h1 className="h3 mb-4 fw-normal text-center">Reset Your Password</h1>
-
-                    <div className="form-floating">
-                        <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required></input>
-                        <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer`} />
-                        <label htmlFor="floatingPassword">New Password</label>
-                    </div>
-                    <div className="form-floating">
-                        <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="cpassword" value={cpassword} onChange={(e) => setCPassword(e.target.value)} placeholder="Confirm New Password" required></input>
-                        <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer`} />
-                        <label htmlFor="floatingPassword">Confirm New Password</label>
-                    </div>
-                    <button className="btn btn-primary w-100 py-2 my-3" type="submit">Reset Password</button>
-                </form>
-                <p className="mt-5 mb-3 text-body-secondary text-center">2023 &copy; PT Surveyor Indonesia</p>
-            </div> */}
             <div className="container">
                 <div className="row mt-5 pt-4">
                     <div className="col-xl-12">

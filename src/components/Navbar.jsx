@@ -57,7 +57,7 @@ export default function Navbar() {
                                     <NavLink to="/profile" className="nav-link"><i className="fa fa-user"></i> Profile</NavLink>
                                 </li>
                                 <li className="dropdown-item">
-                                    <NavLink to="/password_change" className="nav-link"><i className="fa fa-key"></i> Password Change</NavLink>
+                                    <NavLink to="/update_password" className="nav-link"><i className="fa fa-key"></i> Password Change</NavLink>
                                 </li>
                                 <li className="dropdown-item" hidden={`${auth?.data?.user?.role !== 'admin'? 'hidden' : ''}`}>
                                     <NavLink to="/setting" className="nav-link"><i className="fa fa-tools"></i> Settings</NavLink>

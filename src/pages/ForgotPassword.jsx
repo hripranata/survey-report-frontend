@@ -1,11 +1,13 @@
 import SILogo from '/logo.png'
 import { useState, useEffect } from "react"
-import axios from "axios";
+import axios from '../services/axios';
 import { useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2'
 import { useAuth } from "../context/Auth";
+import TopLoadingBar from "../components/TopLoadingBar";
 
 export default function ForgotPasssword() {
+    const [loading, setLoading] = useState(false)
     const { setProgress } = useAuth();
     const navigate = useNavigate();
     const Toast = Swal.mixin({
@@ -23,12 +25,11 @@ export default function ForgotPasssword() {
 
     const forgotHandler = (ev) => {
         ev.preventDefault();
-        alert(email)
-        const API_URL = "http://localhost:8000";
+        setLoading(true)
         if (email.length > 0) {
-            axios.get(API_URL + "/sanctum/csrf-cookie").then(() => {
+            axios.get("/sanctum/csrf-cookie").then(() => {
                 axios
-                    .post(API_URL + "/api/forgot_password", {
+                    .post("/api/forgot_password", {
                         email: email,
                     })
                     .then(() => {
@@ -36,7 +37,7 @@ export default function ForgotPasssword() {
                             title: 'Success request reset link, please check your email !',
                             showDenyButton: false,
                             showCancelButton: false,
-                            confirmButtonText: 'Yes',
+                            confirmButtonText: 'Ok',
                             denyButtonText: 'No',
                             allowOutsideClick: false,
                             customClass: {
@@ -47,18 +48,16 @@ export default function ForgotPasssword() {
                             }
                           }).then((result) => {
                             if (result.isConfirmed) {
-                                Toast.fire({
-                                    icon: 'success',
-                                    title: 'Success request reset link !'
-                                    })
                                 navigate("/")
                             }
                           })
 
                     })
+                    .finally(function() {
+                        setLoading(false)
+                    })
                     .catch(function () {
-                        // setUsername("")
-                        // setPassword("")
+                        setEmail("")
                         Toast.fire({
                             icon: 'error',
                             title: 'Email are not found!'
@@ -72,6 +71,7 @@ export default function ForgotPasssword() {
     }, []);
     return (
         <>
+            <TopLoadingBar/>
             <div className="form-login">
                 <form onSubmit={forgotHandler}>
                     <div className="text-center">
@@ -85,6 +85,15 @@ export default function ForgotPasssword() {
                     </div>
                     <button className="btn btn-primary w-100 py-2 my-3" type="submit">Request Reset Link</button>
                 </form>
+                { loading?
+                    <div className="text-center">
+                        <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                    </div> 
+                    :
+                    <div></div>
+                }
                 <p className="mt-5 mb-3 text-body-secondary text-center">2023 &copy; PT Surveyor Indonesia</p>
             </div>
         </>

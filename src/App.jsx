@@ -16,7 +16,7 @@ import LoadingUpdate from './pages/LoadingUpdate'
 import BunkerUpdate from './pages/BunkerUpdate'
 import Setting from './pages/Setting'
 import TopLoadingBar from './components/TopLoadingBar'
-import PassswordChange from './pages/PasswordChange'
+import UpdatePasssword from './pages/UpdatePassword'
 
 const ROLES = {
   'User': 'user',
@@ -44,14 +44,14 @@ function App() {
                   <Route path="/bunkersurvey" element={<BunkerSurvey />} />
                   <Route path="/report" element={<Report />} />
                   <Route path="/profile" element={<Profile />} />
-                  <Route path="/password_change" element={<PassswordChange />} />
+                  <Route path="/update_password" element={<UpdatePasssword />} />
               </Route>
               <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
                   <Route path="/setting" element={<Setting />} />
               </Route>
               <Route path="/login" element={<Login />} />
               <Route path="/forgot_password" element={<ForgotPassword />} />
-              <Route path="/reset_password" element={<ResetPassword />} />
+              <Route path="/reset_password/:token" element={<ResetPassword />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
               <Route path="*" element={<Navigate to="/login" />} />
 

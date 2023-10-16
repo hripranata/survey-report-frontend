@@ -1,6 +1,6 @@
 import SILogo from '/logo.png'
-import { useState } from "react"
-import axios from "axios";
+import { useState, useEffect } from "react"
+import axios from '../services/axios';
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/Auth";
 import Swal from 'sweetalert2'
@@ -8,7 +8,7 @@ import Swal from 'sweetalert2'
 export default function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const { setAuth } = useAuth();
+    const { setAuth, setProgress } = useAuth();
     const navigate = useNavigate();
 
     const Toast = Swal.mixin({
@@ -31,11 +31,10 @@ export default function Login() {
 
     const loginHandler = (ev) => {
         ev.preventDefault();
-        const API_URL = "http://localhost:8000";
         if (username.length > 0 && password.length > 0) {
-            axios.get(API_URL + "/sanctum/csrf-cookie").then(() => {
+            axios.get("/sanctum/csrf-cookie").then(() => {
                 axios
-                    .post(API_URL + "/api/login", {
+                    .post("/api/login", {
                         username: username,
                         password: password,
                     })
@@ -60,6 +59,10 @@ export default function Login() {
         }
     };
 
+    useEffect(() => {
+        setProgress(100)
+    }, []);
+
     return (
         <>
             <div className="form-login">
@@ -78,7 +81,7 @@ export default function Login() {
                     <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer`} />
                     <label htmlFor="floatingPassword">Password</label>
                 </div>
-                <div className='form-check text-start my-3 p-0'>
+                <div className='form-check text-end my-3 p-0'>
                     <Link to="/forgot_password">Forgot Password?</Link>
                 </div>
                 <button className="btn btn-primary w-100 py-2 my-1" type="submit">Login</button>

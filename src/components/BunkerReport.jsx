@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from '../services/axios';
 import { useAuth } from "../context/Auth";
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
@@ -83,7 +83,6 @@ export default function BunkerReport() {
         'Accept' : 'application/json',
         'Authorization' : 'Bearer ' + auth.data.token
     }
-    const API_URL = "http://localhost:8000";
 
     const handleLoDetail = (lo) => {
         setLoDetail(lo)
@@ -105,7 +104,7 @@ export default function BunkerReport() {
         setMonth(firstDate.getMonth()+1)
         setYear(currentDate.getFullYear())
         if (group){
-            await axios.get(`${API_URL}/api/bunkers/filterbydate/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
+            await axios.get(`/api/bunkers/filterbydate/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
                 headers: headers
             })
             .then((res) => {
@@ -119,7 +118,7 @@ export default function BunkerReport() {
                 }
             })
         } else {
-            await axios.get(`${API_URL}/api/bunkers/filterbyuser/${auth.data.user.id}/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
+            await axios.get(`/api/bunkers/filterbyuser/${auth.data.user.id}/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
                 headers: headers
             })
             .then((res) => {
@@ -136,7 +135,7 @@ export default function BunkerReport() {
     }
 
     const handleDeleteBunker = async (id) => {
-        await axios.delete(`${API_URL}/api/bunkers/${id}`, {
+        await axios.delete(`/api/bunkers/${id}`, {
             headers: headers
         })
         .then(() => {
@@ -149,7 +148,7 @@ export default function BunkerReport() {
     }
 
     const handleExport = async () => {
-        await axios.get(`${API_URL}/api/exports/bunkers/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
+        await axios.get(`/api/exports/bunkers/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
             headers: headers,
             responseType: 'blob', 
         })

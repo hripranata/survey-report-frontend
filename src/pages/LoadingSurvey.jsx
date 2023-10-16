@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import axios from "axios";
+import axios from '../services/axios';
 import { useAuth } from "../context/Auth";
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select'
@@ -66,8 +66,6 @@ export default function LoadingSurvey() {
         'Accept' : 'application/json',
         'Authorization' : 'Bearer ' + auth.data.token
     }
-
-    const API_URL = "http://localhost:8000";
 
     const [formData, setFormData] = useState({
         loDate: datetimeNowID(0),
@@ -156,7 +154,7 @@ export default function LoadingSurvey() {
             // surveyor: auth.data.user.name
         }
     
-        await axios.post(`${API_URL}/api/loadings`, loadingData, { headers: headers })
+        await axios.post(`/api/loadings`, loadingData, { headers: headers })
         .then(() => {
             Toast.fire({
                 icon: 'success',
@@ -174,7 +172,7 @@ export default function LoadingSurvey() {
     }
 
     const handleTongkangList = async () => {
-        await axios.get(`${API_URL}/api/vessels/SPOB`, { headers: headers })
+        await axios.get(`/api/vessels/SPOB`, { headers: headers })
         .then((res) => {
             setVesselOption(changeSelectOption(res.data.data))
         })

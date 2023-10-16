@@ -1,9 +1,10 @@
-import axios from "axios";
+import axios from '../services/axios';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/Auth";
 import Swal from 'sweetalert2'
 import TopLoadingBar from "../components/TopLoadingBar";
+import avatar from '/default-profile-avatar.jpg'
 
 export default function Profile() {
     const { auth, setProgress } = useAuth();
@@ -32,10 +33,9 @@ export default function Profile() {
         'Accept' : 'application/json',
         'Authorization' : 'Bearer ' + auth.data.token
     }
-    const API_URL = "http://localhost:8000";
 
     const fetchUserById = async () => {
-        await axios.get(`${API_URL}/api/users/${auth.data.user.id}`, {
+        await axios.get(`/api/users/${auth.data.user.id}`, {
             headers: headers
         })
         .then((res) => {
@@ -62,7 +62,7 @@ export default function Profile() {
     const hanldeSubmit = async (event) => {
         event.preventDefault();
     
-        await axios.put(`${API_URL}/api/users/${auth.data.user.id}`, user, { headers: headers })
+        await axios.put(`/api/users/${auth.data.user.id}`, user, { headers: headers })
         .then(() => {
             Toast.fire({
                 icon: 'success',
@@ -93,7 +93,7 @@ export default function Profile() {
                             <h5 className="card-header">Profile Picture</h5>
                             <div className="card-body">
                                 <div className="text-center">
-                                    <img src="http://bootdey.com/img/Content/avatar/avatar1.png" className="rounded mb-2" alt="..." width="150" height="150"></img>
+                                    <img src={avatar} className="rounded mb-2" alt="..." width="150" height="150"></img>
                                     <div className="small font-italic text-muted mb-4">JPG or PNG no larger than 5 MB</div>
                                     <button className="btn btn-primary" type="button">Upload new image</button>
                                 </div>

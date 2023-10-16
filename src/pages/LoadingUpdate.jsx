@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from '../services/axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/Auth";
@@ -62,7 +62,6 @@ export default function LoadingUpdate() {
         'Accept' : 'application/json',
         'Authorization' : 'Bearer ' + auth.data.token
     }
-    const API_URL = "http://localhost:8000";
 
     const { id } = useParams();
 
@@ -86,7 +85,7 @@ export default function LoadingUpdate() {
     })
 
     const fetchLoadingById = async () => {
-        await axios.get(`${API_URL}/api/loadings/${id}`, {
+        await axios.get(`/api/loadings/${id}`, {
             headers: headers
         })
         .then((res) => {
@@ -175,7 +174,7 @@ export default function LoadingUpdate() {
             // surveyor: auth.data.user.name
         }
     
-        await axios.put(`${API_URL}/api/loadings/${id}`, loadingData, { headers: headers })
+        await axios.put(`/api/loadings/${id}`, loadingData, { headers: headers })
         .then(() => {
             Toast.fire({
                 icon: 'success',
@@ -194,7 +193,7 @@ export default function LoadingUpdate() {
 
     // Vessel select option
     const handleTongkangList = async () => {
-        await axios.get(`${API_URL}/api/vessels/SPOB`, { headers: headers })
+        await axios.get(`/api/vessels/SPOB`, { headers: headers })
         .then((res) => {
             setVesselOption(changeSelectOption(res.data.data))
         })

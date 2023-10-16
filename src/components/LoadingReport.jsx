@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from '../services/axios';
 import { useAuth } from "../context/Auth";
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
@@ -83,7 +83,6 @@ export default function LoadingReport() {
         'Accept' : 'application/json',
         'Authorization' : 'Bearer ' + auth.data.token
     }
-    const API_URL = "http://localhost:8000";
 
     const handleLoDetail = (lo) => {
         setLoDetail(lo)
@@ -107,7 +106,7 @@ export default function LoadingReport() {
         setYear(currentDate.getFullYear())
         
         if (group){
-            await axios.get(`${API_URL}/api/loadings/filterbydate/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
+            await axios.get(`/api/loadings/filterbydate/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
                 headers: headers
             })
             .then((res) => {
@@ -121,7 +120,7 @@ export default function LoadingReport() {
                 }
             })
         } else {
-            await axios.get(`${API_URL}/api/loadings/filterbyuser/${auth.data.user.id}/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
+            await axios.get(`/api/loadings/filterbyuser/${auth.data.user.id}/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
                 headers: headers
             })
             .then((res) => {
@@ -138,7 +137,7 @@ export default function LoadingReport() {
     }
 
     const handleDeleteLoading = async (id) => {
-        await axios.delete(`${API_URL}/api/loadings/${id}`, {
+        await axios.delete(`/api/loadings/${id}`, {
             headers: headers
         })
         .then(() => {
@@ -151,7 +150,7 @@ export default function LoadingReport() {
     }
 
     const handleExport = async () => {
-        await axios.get(`${API_URL}/api/exports/loadings/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
+        await axios.get(`/api/exports/loadings/${dateFormat(firstDate)}/${dateFormat(currentDate)}`, {
             headers: headers,
             responseType: 'blob', 
         })

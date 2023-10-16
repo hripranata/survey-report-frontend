@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import TopLoadingBar from "../components/TopLoadingBar";
 import { useAuth } from "../context/Auth";
-import axios from "axios";
+import axios from '../services/axios';
 
 export default function Home() {
     const navigate = useNavigate()
@@ -16,10 +16,9 @@ export default function Home() {
         'Accept' : 'application/json',
         'Authorization' : 'Bearer ' + auth.data.token
     }
-    const API_URL = "http://localhost:8000";
 
     const handleCounter = async () => {
-        await axios.get(`${API_URL}/api/loadings/count/${now.getMonth()+1}`, {
+        await axios.get(`/api/loadings/count/${now.getMonth()+1}`, {
             headers: headers
         })
         .then((res) => {
@@ -31,7 +30,7 @@ export default function Home() {
                 setAuth(null)
             }
         })
-        await axios.get(`${API_URL}/api/bunkers/count/${now.getMonth()+1}`, {
+        await axios.get(`/api/bunkers/count/${now.getMonth()+1}`, {
             headers: headers
         })
         .then((res) => {
@@ -58,7 +57,7 @@ export default function Home() {
     const handleOrderList = async (month, year) => {
         setMonth(month)
         setYear(year)
-        await axios.get(`${API_URL}/api/loadings/filter/${month}/${year}`, {
+        await axios.get(`/api/loadings/filter/${month}/${year}`, {
             headers: headers
         })
         .then((res) => {
@@ -88,7 +87,7 @@ export default function Home() {
     const handleVesselList = async (month, year) => {
         setMonth(month)
         setYear(year)
-        await axios.get(`${API_URL}/api/bunkers/filter/${month}/${year}`, {
+        await axios.get(`/api/bunkers/filter/${month}/${year}`, {
             headers: headers
         })
         .then((res) => {
@@ -113,45 +112,7 @@ export default function Home() {
         <>
             <TopLoadingBar/>
             <div className="container mt-5 pt-4">
-                {/* <div className="row">
-                    <div className="col-md-3" style={{position: "relative"}}>
-                        <div className="card-counter primary">
-                            <i className="fa fa-ship fa-3x"></i>
-                            <span className="count-numbers">{loadingCounter.total_loading}</span>
-                            <span className="count-name">Total Loadings</span>
-                        </div>
-                    </div>
-
-                    <div className="col-md-3" style={{position: "relative"}}>
-                        <div className="card-counter danger">
-                            <i className="fa fa-anchor fa-3x"></i>
-                            <span className="count-numbers">{bunkerCounter.total_bunker}</span>
-                            <span className="count-name">Total Bunker</span>
-                        </div>
-                    </div>
-
-                    <div className="col-md-3" style={{position: "relative"}}>
-                        <div className="card-counter info">
-                            <i className="fa fa-oil-can fa-3x"></i>
-                            <span className="count-numbers">{loadingCounter.total_lo} L</span>
-                            <span className="count-name">Total LO</span>
-                        </div>
-                    </div>
-
-                    <div className="col-md-3" style={{position: "relative"}}>
-                        <div className="card-counter success">
-                            <i className="fa fa-gas-pump fa-3x"></i>
-                            <span className="count-numbers">{bunkerCounter.total_ar} L</span>
-                            <span className="count-name">Total AR</span>
-                        </div>
-                    </div>
-
-                </div> */}
-
                 <div className="mx-auto my-1 p-2" style={{width: "auto"}}>
-                    
-                    {/* <div className="card panel-card">
-                    <div className="card-body text-dark" style={{backgroundColor: "#fafafa"}}> */}
                         <div className="row">
                         <div className="col-6 p-1">
                             <div className="card border-primary">
