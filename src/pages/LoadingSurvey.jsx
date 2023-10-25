@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import axios from '../services/axios';
 import { useAuth } from "../context/Auth";
 import { useNavigate } from 'react-router-dom';
@@ -48,6 +48,9 @@ export default function LoadingSurvey() {
         lo_number: "",
         qty: 0,
     }]);
+
+    // self click button
+    const buttonRef = useRef(null);
 
     const Toast = Swal.mixin({
         toast: true,
@@ -172,7 +175,7 @@ export default function LoadingSurvey() {
     }
 
     const handleTongkangList = async () => {
-        await axios.get(`/api/vessels/SPOB`, { headers: headers })
+        await axios.get(`/api/vessels/filter/SPOB`, { headers: headers })
         .then((res) => {
             setVesselOption(changeSelectOption(res.data.data))
         })
@@ -197,6 +200,11 @@ export default function LoadingSurvey() {
         }));
     };
 
+    // ibunker webscrape
+    const initial_scrape = {
+        data: [],
+        status: null
+    }
     const [loadingScrape, setLoadingScrape] = useState(
         {
             data: [],
@@ -226,6 +234,11 @@ export default function LoadingSurvey() {
         })
         .catch((err) => {
             console.error(err);
+            setLoadingScrape((prev) => ({ 
+                ...prev,
+                data: [],
+                status: -1
+            }));
         })
     }
 
@@ -238,6 +251,10 @@ export default function LoadingSurvey() {
         })
     }
 
+    const clearScrape = () => {
+        setLoadingScrape(initial_scrape)
+    }
+
     const handleSaveScrape = (scraped) => {
         setFormData((prevFormData) => ({ 
             ...prevFormData, 
@@ -245,6 +262,8 @@ export default function LoadingSurvey() {
             loVol: parseInt(scraped.detail?.lo_volume.split(' ')[0]) * 1000,
         }));
         setRowsData(changeLoQtyTypeScrape(scraped.lo_number))
+        buttonRef.current.addEventListener('click', clearScrape);
+        buttonRef.current.click();
         Toast.fire({
             icon: 'success',
             title: 'Data successfully selected!'
@@ -345,7 +364,7 @@ export default function LoadingSurvey() {
                     <div className="modal-content">
                     <div className="modal-header">
                         <h5 className="modal-title" id="loDetailLoadingModalLabel">iBunker Loading</h5>
-                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close" ref={buttonRef} onClick={()=>clearScrape()}></button>
                     </div>
                     <div className="modal-body">
                         <div className="accordion" id="accordionExample">
@@ -388,9 +407,13 @@ export default function LoadingSurvey() {
                                     </div>
                                 ))
                                 : loadingScrape?.status == 0 ?
-                                    <div className="text-center">
-                                        <p>Vessel Not Found !</p>
+                                    <div className="alert alert-warning mb-0 text-center">
+                                        Vessel Not Found !
                                     </div>   
+                                : loadingScrape?.status == -1?
+                                    <div className="alert alert-danger mb-0 text-center">
+                                        Sorry, server is error !
+                                    </div>  
                                 :
                                     <div className="text-center">
                                         <div className="spinner-border text-primary" role="status">
@@ -400,9 +423,9 @@ export default function LoadingSurvey() {
                             }
                         </div>
                     </div>
-                    <div className="modal-footer">
+                    {/* <div className="modal-footer">
                         <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
+                    </div> */}
                     </div>
                 </div>
             </div>

@@ -193,7 +193,7 @@ export default function LoadingUpdate() {
 
     // Vessel select option
     const handleTongkangList = async () => {
-        await axios.get(`/api/vessels/SPOB`, { headers: headers })
+        await axios.get(`/api/vessels/filter/SPOB`, { headers: headers })
         .then((res) => {
             setVesselOption(changeSelectOption(res.data.data))
         })

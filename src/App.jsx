@@ -14,9 +14,10 @@ import Unauthorized from './pages/Unauthorized'
 import Layout from './components/Layout';
 import LoadingUpdate from './pages/LoadingUpdate'
 import BunkerUpdate from './pages/BunkerUpdate'
-import Setting from './pages/Setting'
+import VesselList from './pages//VesselList'
 import TopLoadingBar from './components/TopLoadingBar'
 import UpdatePasssword from './pages/UpdatePassword'
+import Setting from './pages/Setting'
 
 const ROLES = {
   'User': 'user',
@@ -47,6 +48,7 @@ function App() {
                   <Route path="/update_password" element={<UpdatePasssword />} />
               </Route>
               <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
+                  <Route path="/vessel_list" element={<VesselList />} />
                   <Route path="/setting" element={<Setting />} />
               </Route>
               <Route path="/login" element={<Login />} />

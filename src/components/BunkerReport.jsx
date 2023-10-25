@@ -282,6 +282,42 @@ _Bunker ${index + 1}_
               })
         }
     }
+
+    const handleCopyBatch = () => {
+        const copyText = subset.map((bunker, index) => {
+            return `
+_Bunker ${index + 1}_
+*Nama tongkang*         : ${bunker.tongkang.vessel_name}
+*Nama KRI*              : ${bunker.kri.vessel_name}
+*Lokasi Bunker*         : ${bunker.bunker_location}
+*Mulai bunker*          : ${bunker.start.split(' ')[1].substring(0,5).replace(':','.')} / ${bunker.start.split(' ')[0].split("-").reverse().join(".")}
+*Selesai bunker*        : ${bunker.stop.split(' ')[1].substring(0,5).replace(':','.')} / ${bunker.stop.split(' ')[0].split("-").reverse().join(".")}
+*No LO*                 : ${ bunker.lo_details.length <= 1? bunker.lo_details[0].lo_number :
+    bunker.lo_details?.map((lo) => {
+        if (index <= 0) {
+            return `${lo.lo_number} : ${numberWithDots(lo.qty)}` 
+        }
+        return `\n${lo.lo_number} : ${numberWithDots(lo.qty)}` 
+})
+}
+*Volume LO*             : ${numberWithDots(bunker.vol_lo)}
+*Volume KRI/AR*         : ${numberWithDots(bunker.vol_ar)}
+*Petugas Survey*        : ${bunker.surveyor}
+            `
+
+    })
+
+
+        console.log(copyText);
+        let isCopy = copy(copyText);
+
+        if (isCopy){
+            Toast.fire({
+                icon: 'success',
+                title: 'Copied to Clipboard'
+              })
+        }
+    }
     return(
         <>
             {/* <div className="tab-pane fade" id="nav-bunker" role="tabpanel" aria-labelledby="nav-bunker-tab" tabIndex="0"> */}
@@ -311,15 +347,16 @@ _Bunker ${index + 1}_
                     </div>
                 </div>
                 <div className="row mb-3 mt-3">
-                    <div className="col text-start">
+                    <div className="col-5 text-start">
                         <button className={`btn btn-outline-primary btn-sm me-2 ${groupReport?'':'active'}`} type="button" onClick={groupReport? ()=>handleAllBunker(!groupReport) : ()=>{}}>My Report</button>
                         <button className={`btn btn-outline-primary btn-sm ${groupReport?'active':''}`} type="button" onClick={groupReport? ()=>{} : ()=>handleAllBunker(!groupReport)}>All Report</button>
                     </div>
-                    <div className="col">
+                    <div className="col-7">
                         <div className="btn-toolbar justify-content-end" role="toolbar" aria-label="Toolbar with button groups">
                             <div className="btn-group" role="group" aria-label="Third group">
                                 <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport || bunkers.length == 0? true : false}><i className="fa fa-pen"></i> {editReport? 'Cancel' : 'Edit'}</button>
-                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleSorting()}><i className="fa fa-sort"></i> {sort == 'desc'? 'Oldest':'Newest'}</button>
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleSorting()} disabled={bunkers.length == 0? true : false}><i className="fa fa-sort"></i> {sort == 'desc'? 'Oldest':'Newest'}</button>
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleCopyBatch()} disabled={bunkers.length == 0? true : false}><i className="fa fa-copy"></i> Copy</button>
                                 <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleExportButton()} disabled={groupReport && bunkers.length > 0 ? false : true}><i className="fa fa-download"></i> Export</button>
                             </div>
                         </div>

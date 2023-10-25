@@ -214,7 +214,7 @@ export default function LoadingReport() {
                 handleDeleteLoading(id)
                 Toast.fire({
                     icon: 'success',
-                    title: 'Success updating data!'
+                    title: 'Success delete data!'
                   })
             }
           })
@@ -322,7 +322,7 @@ ${
                         <div className="btn-toolbar justify-content-end" role="toolbar" aria-label="Toolbar with button groups">
                             <div className="btn-group" role="group" aria-label="First group">
                                 <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleEditReport(!editReport)} disabled={groupReport || loadings.length == 0 ? true : false}><i className="fa fa-pen"></i> {editReport? 'Cancel' : 'Edit' }</button>
-                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleSorting()}><i className="fa fa-sort"></i> {sort == 'desc'? 'Oldest':'Newest'}</button>
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleSorting()} disabled={loadings.length == 0 ? true : false}><i className="fa fa-sort"></i> {sort == 'desc'? 'Oldest':'Newest'}</button>
                                 <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => handleExportButton()} disabled={groupReport && loadings.length > 0 ? false : true}><i className="fa fa-download"></i> Export</button>
                             </div>
                         </div>

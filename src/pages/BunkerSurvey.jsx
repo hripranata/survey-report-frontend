@@ -118,7 +118,7 @@ export default function BunkerSurvey() {
 
     // Vessel Select Option
     const handleVesselList = async () => {
-        await axios.get(`/api/vessels/SPOB`, { headers: headers })
+        await axios.get(`/api/vessels/filter/SPOB`, { headers: headers })
         .then((res) => {
             setTongkangOption(changeVesselOption(res.data.data))
         })
@@ -126,7 +126,7 @@ export default function BunkerSurvey() {
             console.error(err);
         })
 
-        await axios.get(`/api/vessels/KRI`, { headers: headers })
+        await axios.get(`/api/vessels/filter/KRI`, { headers: headers })
         .then((res) => {
             setKriOption(changeVesselOption(res.data.data))
         })

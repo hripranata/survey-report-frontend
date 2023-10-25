@@ -257,7 +257,7 @@ export default function Home() {
                         : orderList?.status == 0 ?
                             <div className="text-center">
                                 {/* <p>Order List !</p> */}
-                                <div className="alert alert-danger mb-0">
+                                <div className="alert alert-warning mb-0">
                                     Data Belum Tersedia !
                                 </div>
                             </div>   

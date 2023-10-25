@@ -46,6 +46,9 @@ export default function Navbar() {
                         <li className="nav-item">
                             <NavLink to="/report" className="nav-link">Survey Report</NavLink>
                         </li>
+                        <li className="nav-item" hidden={`${auth?.data?.user?.role !== 'admin'? 'hidden' : ''}`}>
+                            <NavLink to="/vessel_list" className="nav-link">Vessel List</NavLink>
+                        </li>
                     </ul>
                     <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
                         <li className="nav-item dropdown">
