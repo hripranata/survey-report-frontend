@@ -99,20 +99,20 @@ export default function UpdatePasssword() {
                             <h5 className="card-header">Change Password</h5>
                             <div className="card-body">
                                 <form className='mt-3' onSubmit={handlePasswordChange}>
-                                    <div className="form-floating mb-3">
-                                        <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required></input>
-                                        <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer`} />
-                                        <label htmlFor="floatingPassword">Old Password</label>
+                                    <div className="mb-3">
+                                        <label className="form-label" htmlFor="password">Old Password</label>
+                                        <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter old password" required></input>
+                                        <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer-update`} />
                                     </div>
-                                    <div className="form-floating mb-3">
-                                        <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="npassword" value={npassword} onChange={(e) => setNPassword(e.target.value)} placeholder="New Password" required></input>
-                                        <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer`} />
-                                        <label htmlFor="floatingPassword">New Password</label>
+                                    <div className="mb-3">
+                                        <label className="form-label" htmlFor="npassword">New Password</label>
+                                        <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="npassword" value={npassword} onChange={(e) => setNPassword(e.target.value)} placeholder="Enter new password" required></input>
+                                        <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer-update`} />
                                     </div>
-                                    <div className="form-floating">
-                                        <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="cpassword" value={cpassword} onChange={(e) => setCPassword(e.target.value)} placeholder="Confirm New Password" required></input>
-                                        <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer`} />
-                                        <label htmlFor="floatingPassword">Confirm New Password</label>
+                                    <div className="mb-3">
+                                        <label className="form-label" htmlFor="cpassword">Confirm New Password</label>
+                                        <input type={`${showPass? 'text' : 'password'}`} className="form-control" name="cpassword" value={cpassword} onChange={(e) => setCPassword(e.target.value)} placeholder="Enter confirm new password" required></input>
+                                        <i onClick={()=>handlePass()} className={`${showPass ? 'fas fa-eye-slash' : 'fas fa-eye'} p-viewer-update`} />
                                     </div>
                                     <button className="btn btn-primary w-100 py-2 my-4" type="submit">Change Password</button>
                                 </form>

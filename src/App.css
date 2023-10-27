@@ -10,6 +10,15 @@
   cursor:pointer;
   opacity: 0.5;
 }
+.p-viewer-update{
+  float: right;
+  margin-top: -27px;
+  margin-right: 15px;
+  position: relative;
+  z-index: 1;
+  cursor:pointer;
+  opacity: 0.5;
+}
 .navbar {
   background-color: #fff;
 }

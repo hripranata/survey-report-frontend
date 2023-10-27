@@ -299,7 +299,7 @@ export default function LoadingSurvey() {
                     <div className="col-12">
                         <select className="mb-3 form-select" aria-label="BBM" name="bbm" value={formData.bbm} onChange={handleChange}>
                             <option value="HSD">HSD</option>
-                            <option value="B30">B35</option>
+                            <option value="B35">B35</option>
                         </select>
                     </div>
                     <div className="col-12">
