@@ -238,6 +238,7 @@ export default function BunkerUpdate() {
         {value: "JICT 2", label: "JICT 2"},
         {value: "Kolinlamil", label: "Kolinlamil"},
         {value: "Pondok Dayung", label: "Pondok Dayung"},
+        {value: "Kade 100", label: "Kade 100"},
     ]
 
     const handleChangeBunkerLocation = (selectedOption) => {
