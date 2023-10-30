@@ -3,5 +3,5 @@ import axios from 'axios';
 
 export default axios.create({
     withCredentials: true,
-    baseURL: import.meta.env.VITE_BASE_URL
+    baseURL: 'https://survey-report-api.onrender.com'
 });
