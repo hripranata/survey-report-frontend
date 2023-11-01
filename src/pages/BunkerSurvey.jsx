@@ -7,27 +7,10 @@ import makeAnimated from 'react-select/animated';
 import CreatableSelect from 'react-select/creatable';
 import Swal from 'sweetalert2'
 import TopLoadingBar from "../components/TopLoadingBar";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const animatedComponents = makeAnimated();
-
-const datetimeNowID = (selector) => {
-    const now = new Date()
-    let datetime = now.toLocaleString('id-ID', {
-        hour12: false, 
-        hourCycle: 'h23',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-    })
-    if (selector == 0) {
-        return datetime.split(', ')[0].split("/").reverse().join("-")
-    } else {
-        return datetime.split(', ')[1].substring(0,5).replace(".",":")
-    }
-}
 
 export default function BunkerSurvey() {
     const { auth, setProgress } = useAuth();
@@ -48,6 +31,39 @@ export default function BunkerSurvey() {
         timerProgressBar: true
     })
 
+    // date & time format
+    const [startDate, setStartDate] = useState(new Date());
+    const [stopDate, setStopDate] = useState(new Date());
+    const dateFormat = (date) => {
+        let day = date.getDate();
+        let month = date.getMonth() + 1;
+        let year = date.getFullYear();
+        
+        if (day < 10) {
+            day = `0${day}`;
+        }
+        
+        if (month < 10) {
+            month = `0${month}`;
+        }
+        
+        return `${year}-${month}-${day}`;
+    }
+    const timeFormat = (date) => {
+        let h = date.getHours()
+        let m = date.getMinutes()
+
+        if (h < 10) {
+            h = `0${h}`;
+        }
+        
+        if (m < 10) {
+            m = `0${m}`;
+        }
+
+        return `${h}:${m}`;
+    }
+
     const headers = {
         'Content-Type' : 'application/json',
         'Accept' : 'application/json',
@@ -59,15 +75,19 @@ export default function BunkerSurvey() {
         kri_id: 0,
         bunker_location: "",
         bbm: "HSD",
-        bunkerStartTime: datetimeNowID(1),
-        bunkerStartDate: datetimeNowID(0),
-        bunkerStopTime: datetimeNowID(1),
-        bunkerStopDate: datetimeNowID(0),
+        bunkerStartTime: timeFormat(startDate),
+        bunkerStartDate: dateFormat(startDate),
+        bunkerStopTime: timeFormat(stopDate),
+        bunkerStopDate: dateFormat(stopDate),
         lo_details: [],
         loVol: 0,
         arVol: 0,
         surveyor: auth.data.user.name
     })
+
+    const handleChangeDate = (name, value) => {
+        setFormData((prevFormData) => ({ ...prevFormData, [name]: dateFormat(value) }));
+    };
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -264,8 +284,17 @@ export default function BunkerSurvey() {
                                 <input type="time" className="form-control" name="bunkerStartTime" value={formData.bunkerStartTime} onChange={handleChange}/>
                             </div>
                             <div className="col">
-                            <label htmlFor="inputStartDate" className="form-label">Start Date</label>
-                                <input type="date" className="form-control" name="bunkerStartDate" value={formData.bunkerStartDate} onChange={handleChange}/>
+                                <label htmlFor="inputStartDate" className="form-label">Start Date</label>
+                                <DatePicker 
+                                    onFocus={e => e.target.blur()}
+                                    selected={startDate}
+                                    dateFormat="dd/MM/yyyy"
+                                    onChange={(date) => {
+                                        setStartDate(date)
+                                        handleChangeDate('bunkerStartDate', date)
+                                    }}
+                                    className="form-select" 
+                                />
                             </div>
                         </div>
                         <div className="row">
@@ -275,7 +304,16 @@ export default function BunkerSurvey() {
                             </div>
                             <div className="col">
                                 <label htmlFor="inputStopDate" className="form-label">Stop Date</label>
-                                <input type="date" className="form-control" name="bunkerStopDate" value={formData.bunkerStopDate} onChange={handleChange}/>
+                                <DatePicker 
+                                    onFocus={e => e.target.blur()}
+                                    selected={stopDate}
+                                    dateFormat="dd/MM/yyyy"
+                                    onChange={(date) => {
+                                        setStopDate(date)
+                                        handleChangeDate('bunkerStopDate', date)
+                                    }}
+                                    className="form-select" 
+                                />
                             </div>
                         </div>
                     </div>

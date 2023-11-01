@@ -5,6 +5,8 @@ import { useAuth } from "../context/Auth";
 import Select from 'react-select'
 import Swal from 'sweetalert2'
 import TopLoadingBar from "../components/TopLoadingBar";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function TableRows({rowsData, deleteTableRows, handleChange}) {
     return (
@@ -19,25 +21,6 @@ function TableRows({rowsData, deleteTableRows, handleChange}) {
             )
         })
     )
-}
-
-const datetimeNowID = (selector) => {
-    const now = new Date()
-    let datetime = now.toLocaleString('id-ID', {
-        hour12: false, 
-        hourCycle: 'h23',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-    })
-    if (selector == 0) {
-        return datetime.split(', ')[0].split("/").reverse().join("-")
-    } else {
-        return datetime.split(', ')[1].substring(0,5).replace(".",":")
-    }
 }
 
 export default function LoadingUpdate() {
@@ -57,6 +40,40 @@ export default function LoadingUpdate() {
         timerProgressBar: true
     })
 
+    // date & time format
+    const [loDate, setLoDate] = useState(new Date());
+    const [startDate, setStartDate] = useState(new Date());
+    const [stopDate, setStopDate] = useState(new Date());
+    const dateFormat = (date) => {
+        let day = date.getDate();
+        let month = date.getMonth() + 1;
+        let year = date.getFullYear();
+        
+        if (day < 10) {
+            day = `0${day}`;
+        }
+        
+        if (month < 10) {
+            month = `0${month}`;
+        }
+        
+        return `${year}-${month}-${day}`;
+    }
+    const timeFormat = (date) => {
+        let h = date.getHours()
+        let m = date.getMinutes()
+
+        if (h < 10) {
+            h = `0${h}`;
+        }
+        
+        if (m < 10) {
+            m = `0${m}`;
+        }
+
+        return `${h}:${m}`;
+    }
+
     const headers = {
         'Content-Type' : 'application/json',
         'Accept' : 'application/json',
@@ -71,18 +88,22 @@ export default function LoadingUpdate() {
     }]);
 
     const [formData, setFormData] = useState({
-        loDate: datetimeNowID(0),
+        loDate: dateFormat(loDate),
         tongkang_id: 0,
         bbm: "HSD",
-        loadStartTime: datetimeNowID(1),
-        loadStartDate: datetimeNowID(0),
-        loadStopTime: datetimeNowID(1),
-        loadStopDate: datetimeNowID(0),
+        loadStartTime: timeFormat(startDate),
+        loadStartDate: dateFormat(startDate),
+        loadStopTime: timeFormat(stopDate),
+        loadStopDate: dateFormat(stopDate),
         lo_details: [],
         loVol: 0,
         alVol: 0,
         surveyor: auth.data.user.name
     })
+
+    const handleChangeDate = (name, value) => {
+        setFormData((prevFormData) => ({ ...prevFormData, [name]: dateFormat(value) }));
+    };
 
     const fetchLoadingById = async () => {
         await axios.get(`/api/loadings/${id}`, {
@@ -235,9 +256,18 @@ export default function LoadingUpdate() {
                 <h1 className="text-center">Update Loading Report</h1>
             </div>
             <form className="row g-3" onSubmit={hanldeSubmit}>
-                <div className="col-12 mb-3">
+                <div className="col-6 mb-3">
                     <label htmlFor="inputLODate" className="form-label">LO Date</label>
-                    <input type="date" className="form-control" name="loDate" value={formData.loDate} onChange={handleChange}></input>
+                        <DatePicker 
+                            onFocus={e => e.target.blur()}
+                            selected={loDate}
+                            dateFormat="dd/MM/yyyy"
+                            onChange={(date) => {
+                                setLoDate(date)
+                                handleChangeDate('loDate', date)
+                            }}
+                            className="form-select"
+                        />
                 </div>
                 <div className="col-12">
                         <Select
@@ -263,8 +293,17 @@ export default function LoadingUpdate() {
                             <input type="time" className="form-control" name="loadStartTime" value={formData.loadStartTime} onChange={handleChange}></input>
                         </div>
                         <div className="col">
-                        <label htmlFor="inputStartDate" className="form-label">Start Date</label>
-                            <input type="date" className="form-control" name="loadStartDate" value={formData.loadStartDate} onChange={handleChange}></input>
+                            <label htmlFor="inputStartDate" className="form-label">Start Date</label>
+                            <DatePicker 
+                                onFocus={e => e.target.blur()}
+                                selected={startDate}
+                                dateFormat="dd/MM/yyyy"
+                                onChange={(date) => {
+                                    setStartDate(date)
+                                    handleChangeDate('loadStartDate', date)
+                                }}
+                                className="form-select" 
+                            />
                         </div>
                     </div>
                     <div className="row">
@@ -274,7 +313,16 @@ export default function LoadingUpdate() {
                         </div>
                         <div className="col">
                             <label htmlFor="inputStopDate" className="form-label">Stop Date</label>
-                            <input type="date" className="form-control" name="loadStopDate" value={formData.loadStopDate} onChange={handleChange}></input>
+                            <DatePicker 
+                                onFocus={e => e.target.blur()}
+                                selected={stopDate}
+                                dateFormat="dd/MM/yyyy"
+                                onChange={(date) => {
+                                    setStopDate(date)
+                                    handleChangeDate('loadStopDate', date)
+                                }}
+                                className="form-select" 
+                            />
                         </div>
                     </div>
                 </div>

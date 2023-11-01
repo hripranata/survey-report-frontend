@@ -32,6 +32,7 @@ export default function LoadingSurvey() {
         qty: 0,
     }]);
 
+    // date & time format
     const [loDate, setLoDate] = useState(new Date());
     const [startDate, setStartDate] = useState(new Date());
     const [stopDate, setStopDate] = useState(new Date());
@@ -53,6 +54,14 @@ export default function LoadingSurvey() {
     const timeFormat = (date) => {
         let h = date.getHours()
         let m = date.getMinutes()
+
+        if (h < 10) {
+            h = `0${h}`;
+        }
+        
+        if (m < 10) {
+            m = `0${m}`;
+        }
 
         return `${h}:${m}`;
     }
@@ -294,18 +303,17 @@ export default function LoadingSurvey() {
                     <h1 className="text-center">Loading Survey Report</h1>
                 </div>
                 <form className="row g-3" onSubmit={hanldeSubmit}>
-                    <div className="col-12 mb-3">
+                    <div className="col-6 mb-3">
                         <label htmlFor="inputLODate" className="form-label">LO Date</label>
-                        {/* <input type="date" className="form-control" name="loDate" value={formData.loDate} onChange={handleChange}/> */}
                         <DatePicker 
+                            onFocus={e => e.target.blur()}
                             selected={loDate}
                             dateFormat="dd/MM/yyyy"
-                            disabledKeyboardNavigation 
                             onChange={(date) => {
                                 setLoDate(date)
                                 handleChangeDate('loDate', date)
                             }}
-                            className="form-select" 
+                            className="form-select"
                         />
                     </div>
                     <div className="col-12">
@@ -332,11 +340,10 @@ export default function LoadingSurvey() {
                             </div>
                             <div className="col">
                                 <label htmlFor="inputStartDate" className="form-label">Start Date</label>
-                                {/* <input type="date" className="form-control" name="loadStartDate" value={formData.loadStartDate} onChange={handleChange}/> */}
                                 <DatePicker 
+                                    onFocus={e => e.target.blur()}
                                     selected={startDate}
                                     dateFormat="dd/MM/yyyy"
-                                    disabledKeyboardNavigation 
                                     onChange={(date) => {
                                         setStartDate(date)
                                         handleChangeDate('loadStartDate', date)
@@ -352,11 +359,10 @@ export default function LoadingSurvey() {
                             </div>
                             <div className="col">
                                 <label htmlFor="inputStopDate" className="form-label">Stop Date</label>
-                                {/* <input type="date" className="form-control" name="loadStopDate" value={formData.loadStopDate} onChange={handleChange}/> */}
                                 <DatePicker 
+                                    onFocus={e => e.target.blur()}
                                     selected={stopDate}
                                     dateFormat="dd/MM/yyyy"
-                                    disabledKeyboardNavigation 
                                     onChange={(date) => {
                                         setStopDate(date)
                                         handleChangeDate('loadStopDate', date)
