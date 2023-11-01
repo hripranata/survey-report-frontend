@@ -9,6 +9,7 @@ export default function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const { setAuth, setProgress } = useAuth();
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const Toast = Swal.mixin({
@@ -31,6 +32,7 @@ export default function Login() {
 
     const loginHandler = (ev) => {
         ev.preventDefault();
+        setLoading(true)
         if (username.length > 0 && password.length > 0) {
             axios.get("/sanctum/csrf-cookie").then(() => {
                 axios
@@ -40,12 +42,16 @@ export default function Login() {
                     })
                     .then((response) => {
                         //  localStorage.setItem('user', JSON.stringify(response.data))
-                         setAuth(response.data)
-                         Toast.fire({
+                        setLoading(false)
+                        setAuth(response.data)
+                        Toast.fire({
                             icon: 'success',
                             title: 'Success Login'
                             })
-                         navigate("/home")
+                        navigate("/home")
+                    })
+                    .finally(function() {
+                        setLoading(false)
                     })
                     .catch(function () {
                         setUsername("")
@@ -86,6 +92,15 @@ export default function Login() {
                 </div>
                 <button className="btn btn-primary w-100 py-2 my-1" type="submit">Login</button>
             </form>
+            {loading?
+                <div className="text-center mt-3">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                :
+                <div></div>
+            }
             <p className="mt-5 mb-3 text-body-secondary text-center">2023 &copy; PT Surveyor Indonesia</p>
             </div>
         

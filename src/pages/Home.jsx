@@ -108,7 +108,6 @@ export default function Home() {
         handleVesselList(month, year)
         setProgress(100)
     }, []);
-    console.log(process.env.NODE_ENV);
     return (
         <>
             <TopLoadingBar/>
