@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import Select from 'react-select'
 import Swal from 'sweetalert2'
 import TopLoadingBar from "../components/TopLoadingBar";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function TableRows({rowsData, deleteTableRows, handleChange}) {
     return (
@@ -21,25 +23,6 @@ function TableRows({rowsData, deleteTableRows, handleChange}) {
     )
 }
 
-const datetimeNowID = (selector) => {
-    const now = new Date()
-    let datetime = now.toLocaleString('id-ID', {
-        hour12: false, 
-        hourCycle: 'h23',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-    })
-    if (selector == 0) {
-        return datetime.split(', ')[0].split("/").reverse().join("-")
-    } else {
-        return datetime.split(', ')[1].substring(0,5).replace(".",":")
-    }
-}
-
 export default function LoadingSurvey() {
     const { auth, setProgress } = useAuth();
     const navigate = useNavigate();
@@ -49,40 +32,69 @@ export default function LoadingSurvey() {
         qty: 0,
     }]);
 
+    const [loDate, setLoDate] = useState(new Date());
+    const [startDate, setStartDate] = useState(new Date());
+    const [stopDate, setStopDate] = useState(new Date());
+    const dateFormat = (date) => {
+        let day = date.getDate();
+        let month = date.getMonth() + 1;
+        let year = date.getFullYear();
+        
+        if (day < 10) {
+            day = `0${day}`;
+        }
+        
+        if (month < 10) {
+            month = `0${month}`;
+        }
+        
+        return `${year}-${month}-${day}`;
+    }
+    const timeFormat = (date) => {
+        let h = date.getHours()
+        let m = date.getMinutes()
+
+        return `${h}:${m}`;
+    }
+    
     // self click button
     const buttonRef = useRef(null);
-
+    
     const Toast = Swal.mixin({
         toast: true,
         position: 'bottom-end',
         iconColor: 'white',
         customClass: {
-          popup: 'colored-toast'
+            popup: 'colored-toast'
         },
         showConfirmButton: false,
         timer: 1250,
         timerProgressBar: true
     })
-
+    
     const headers = {
         'Content-Type' : 'application/json',
         'Accept' : 'application/json',
         'Authorization' : 'Bearer ' + auth.data.token
     }
-
+    
     const [formData, setFormData] = useState({
-        loDate: datetimeNowID(0),
+        loDate: dateFormat(loDate),
         tongkang_id: 0,
         bbm: "HSD",
-        loadStartTime: datetimeNowID(1),
-        loadStartDate: datetimeNowID(0),
-        loadStopTime: datetimeNowID(1),
-        loadStopDate: datetimeNowID(0),
+        loadStartTime: timeFormat(startDate),
+        loadStartDate: dateFormat(startDate),
+        loadStopTime: timeFormat(stopDate),
+        loadStopDate: dateFormat(stopDate),
         lo_details: [],
         loVol: 0,
         alVol: 0,
         surveyor: auth.data.user.name
     })
+    
+    const handleChangeDate = (name, value) => {
+        setFormData((prevFormData) => ({ ...prevFormData, [name]: dateFormat(value) }));
+    };
 
     const sumQty = (rows) => {
         return rows.reduce((total, row) => {
@@ -284,7 +296,17 @@ export default function LoadingSurvey() {
                 <form className="row g-3" onSubmit={hanldeSubmit}>
                     <div className="col-12 mb-3">
                         <label htmlFor="inputLODate" className="form-label">LO Date</label>
-                        <input type="date" className="form-control" name="loDate" value={formData.loDate} onChange={handleChange}/>
+                        {/* <input type="date" className="form-control" name="loDate" value={formData.loDate} onChange={handleChange}/> */}
+                        <DatePicker 
+                            selected={loDate}
+                            dateFormat="dd/MM/yyyy"
+                            disabledKeyboardNavigation 
+                            onChange={(date) => {
+                                setLoDate(date)
+                                handleChangeDate('loDate', date)
+                            }}
+                            className="form-select" 
+                        />
                     </div>
                     <div className="col-12">
                         <Select
@@ -309,8 +331,18 @@ export default function LoadingSurvey() {
                                 <input type="time" className="form-control" name="loadStartTime" value={formData.loadStartTime} onChange={handleChange}/>
                             </div>
                             <div className="col">
-                            <label htmlFor="inputStartDate" className="form-label">Start Date</label>
-                                <input type="date" className="form-control" name="loadStartDate" value={formData.loadStartDate} onChange={handleChange}/>
+                                <label htmlFor="inputStartDate" className="form-label">Start Date</label>
+                                {/* <input type="date" className="form-control" name="loadStartDate" value={formData.loadStartDate} onChange={handleChange}/> */}
+                                <DatePicker 
+                                    selected={startDate}
+                                    dateFormat="dd/MM/yyyy"
+                                    disabledKeyboardNavigation 
+                                    onChange={(date) => {
+                                        setStartDate(date)
+                                        handleChangeDate('loadStartDate', date)
+                                    }}
+                                    className="form-select" 
+                                />
                             </div>
                         </div>
                         <div className="row">
@@ -320,7 +352,17 @@ export default function LoadingSurvey() {
                             </div>
                             <div className="col">
                                 <label htmlFor="inputStopDate" className="form-label">Stop Date</label>
-                                <input type="date" className="form-control" name="loadStopDate" value={formData.loadStopDate} onChange={handleChange}/>
+                                {/* <input type="date" className="form-control" name="loadStopDate" value={formData.loadStopDate} onChange={handleChange}/> */}
+                                <DatePicker 
+                                    selected={stopDate}
+                                    dateFormat="dd/MM/yyyy"
+                                    disabledKeyboardNavigation 
+                                    onChange={(date) => {
+                                        setStopDate(date)
+                                        handleChangeDate('loadStopDate', date)
+                                    }}
+                                    className="form-select" 
+                                />
                             </div>
                         </div>
                     </div>
