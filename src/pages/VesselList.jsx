@@ -35,12 +35,9 @@ export default function VesselList() {
     const [edited, setEdited] = useState(false)
     const [editedId, setEditedId] = useState(0)
 
-    // search data
+    // paging & search data
     const [search, setSearch] = useState("")
-    const searchHandler = (e) => {
-        let lowerCase = e.target.value?.toLowerCase();
-        setSearch(lowerCase);
-    };
+
 
     const filteredData = vessels.filter((el) => {
         if (search === '') {
@@ -49,14 +46,20 @@ export default function VesselList() {
             return el.vessel_name.toLowerCase().includes(search)
         }
     })
-
-    // pagination
+    
     const [currentPage, setCurrentPage] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
     const itemsPerPage = 10
     const startIndex = currentPage * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
+    const totalPgs = Math.ceil(filteredData.length / itemsPerPage)
     const subset = filteredData.slice(startIndex, endIndex);
+    
+    const searchHandler = (e) => {
+        let lowerCase = e.target.value?.toLowerCase();
+        setSearch(lowerCase);
+        setCurrentPage(0)
+    };
 
     const handlePageChange = (selectedPage) => {
         setCurrentPage(selectedPage.selected);
@@ -305,7 +308,7 @@ export default function VesselList() {
                                     </table>
                                 </div>
                                 <ReactPaginate
-                                    pageCount={totalPages}
+                                    pageCount={search.length > 0? totalPgs : totalPages}
                                     onPageChange={handlePageChange}
                                     forcePage={currentPage}
                                     containerClassName=""

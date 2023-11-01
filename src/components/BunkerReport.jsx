@@ -429,6 +429,7 @@ _Bunker ${index + 1}_
                     nextLabel={<span aria-hidden="true">&raquo;</span>}
                     previousLinkClassName={"page-link"}
                     nextLinkClassName={"page-link"}
+                    breakLinkClassName={"page-link"}
                     activeClassName={"active"}
                 />
             {/* </div> */}
