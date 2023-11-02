@@ -22,6 +22,8 @@ export default function VesselList() {
         timerProgressBar: true
     })
 
+    const [loading, setLoading] = useState(false)
+
     // self click button
     const buttonRef = useRef(null);
 
@@ -67,12 +69,14 @@ export default function VesselList() {
 
     // Vessel List View
     const handleVesselList = async () => {
+        setLoading(true)
         await axios.get(`/api/vessels`, {
             headers: headers
         })
         .then((res) => {
             setVessels(res.data.data);
             setTotalPages(Math.ceil(res.data.data.length / itemsPerPage));
+            setLoading(false)
         })
         .catch((err) => {
             console.error(err);
@@ -296,10 +300,19 @@ export default function VesselList() {
                                                     <td ><button type="button" className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteButton(vsl.id)}><i className="fa fa-trash"></i></button></td>
                                                 </tr>
                                             ))
-                                        :   <tr>
+                                        : !loading?   
+                                            <tr>
                                                 <td colSpan="11" className="text-center">
                                                     <div className="alert alert-danger mb-0">
                                                         Data Belum Tersedia!
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        :
+                                            <tr>
+                                                <td colSpan="11" className="text-center">
+                                                    <div className="spinner-border text-primary" role="status">
+                                                        <span className="visually-hidden">Loading...</span>
                                                     </div>
                                                 </td>
                                             </tr>

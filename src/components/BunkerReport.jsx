@@ -324,7 +324,8 @@ _Bunker ${index + 1}_
                 <h4 className="mt-3 text-center">Bunker Report</h4>
                 <div className="row mb-3 mt-3">
                     <div className="col text-center">
-                        <DatePicker 
+                        <DatePicker
+                            onFocus={e => e.target.blur()} 
                             selected={firstDate}
                             dateFormat="dd/MM/yyyy" 
                             onChange={(date) => {
@@ -336,6 +337,7 @@ _Bunker ${index + 1}_
                     </div>
                     <div className="col">
                         <DatePicker 
+                            onFocus={e => e.target.blur()}
                             selected={currentDate}
                             dateFormat="dd/MM/yyyy" 
                             onChange={(date) => {

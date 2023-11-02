@@ -291,7 +291,8 @@ ${
                 <h4 className="text-center mt-3">Loading Report</h4>
                 <div className="row mb-3 mt-3">
                     <div className="col text-center">
-                        <DatePicker 
+                        <DatePicker
+                            onFocus={e => e.target.blur()} 
                             selected={firstDate}
                             dateFormat="dd/MM/yyyy" 
                             onChange={(date) => {
@@ -302,7 +303,8 @@ ${
                         />
                     </div>
                     <div className="col">
-                        <DatePicker 
+                        <DatePicker
+                            onFocus={e => e.target.blur()} 
                             selected={currentDate}
                             dateFormat="dd/MM/yyyy" 
                             onChange={(date) => {
