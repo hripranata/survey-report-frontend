@@ -114,6 +114,8 @@ export default function BunkerUpdate() {
             }));
             setloNumberOption(changeLoValue(bunkerById.lo_details),)
             handleLoNumberList(bunkerById.tongkang.id, bunkerById.lo_details)
+            setStartDate(new Date(bunkerById.start))
+            setStopDate(new Date(bunkerById.stop))
         })
         .catch((err) => {
             console.error(err);

@@ -125,6 +125,9 @@ export default function LoadingUpdate() {
                 alVol: loadingById.vol_al,
             }));
             setRowsData(loadingById.lo_details)
+            setLoDate(new Date(loadingById.lo_date))
+            setStartDate(new Date(loadingById.start))
+            setStopDate(new Date(loadingById.stop))
         })
         .catch((err) => {
             console.error(err);
