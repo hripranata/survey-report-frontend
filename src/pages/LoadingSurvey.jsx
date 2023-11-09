@@ -214,11 +214,13 @@ export default function LoadingSurvey() {
         })
     }
 
+    const [vesselScrape, setVesselScrape] = useState('')
     const handleChangeVessel = (selectedOption) => {
         setFormData((prevFormData) => ({ 
             ...prevFormData,
             tongkang_id: selectedOption.value, 
         }));
+        setVesselScrape(selectedOption.vessel_name)
     };
 
     // ibunker webscrape
@@ -235,13 +237,16 @@ export default function LoadingSurvey() {
 
     const addFromScrape = async () => {
         setLoadingScrape(loadingScrape)
-        await axios.get('http://localhost:3500/api/ibunker', { headers: headers })
+        await axios.post('http://localhost:3500/api/ibunker', {vessel: vesselScrape, date:formData.loDate.replaceAll('-','/')}, { headers: {
+            'Content-Type' : 'application/json',
+            'Accept' : 'application/json',
+        } })
         .then((res) => {
-            if (res.data.vessel_queue.length > 0) {
+            if (res.data.vessels_queue.length > 0) {
                 // setLoadingScrape(res.data.vessel_queue)
                 setLoadingScrape((prev) => ({ 
                     ...prev,
-                    data: res.data.vessel_queue,
+                    data: res.data.vessels_queue,
                     status: 1 
                 }));
             } else {
@@ -267,7 +272,7 @@ export default function LoadingSurvey() {
         return rows.map(row => {
             return {
                 lo_number: row.lo_number,
-                qty: parseInt(row.qty) * 1000
+                qty: parseFloat(row.qty) * 1000
             }
         })
     }
@@ -280,7 +285,7 @@ export default function LoadingSurvey() {
         setFormData((prevFormData) => ({ 
             ...prevFormData, 
             lo_details: changeLoQtyTypeScrape(scraped.lo_number),
-            loVol: parseInt(scraped.detail?.lo_volume.split(' ')[0]) * 1000,
+            loVol: parseFloat(scraped.detail?.lo_volume.split(' ')[0]) * 1000,
         }));
         setRowsData(changeLoQtyTypeScrape(scraped.lo_number))
         buttonRef.current.addEventListener('click', clearScrape);
@@ -438,12 +443,12 @@ export default function LoadingSurvey() {
                                                 {loading.lo_number?.map((lo, index) => (
                                                     <tr key={index}>
                                                         <td>{lo.lo_number}</td>
-                                                        <td>{parseInt(lo.qty) * 1000}</td>
+                                                        <td>{parseFloat(lo.qty) * 1000}</td>
                                                     </tr>
                                                 ))}
                                                     <tr>
                                                         <td className="text-end">Total</td>
-                                                        <td>{parseInt(loading.detail?.lo_volume.split(' ')[0]) * 1000}</td>
+                                                        <td>{parseFloat(loading.detail?.lo_volume.split(' ')[0]) * 1000}</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
