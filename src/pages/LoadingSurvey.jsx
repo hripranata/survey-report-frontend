@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { useState, useEffect, useRef } from "react"
 import axios from '../services/axios';
 import { useAuth } from "../context/Auth";
@@ -237,7 +238,7 @@ export default function LoadingSurvey() {
 
     const addFromScrape = async () => {
         setLoadingScrape(loadingScrape)
-        await axios.post('https://ibunker-webscrape.onrender.com/api/ibunker', {vessel: vesselScrape, date:formData.loDate.replaceAll('-','/')}, { headers: {
+        await axios.post(!process.env.NODE_ENV || process.env.NODE_ENV === "development"? 'http://localhost:3500/api/ibunker' : 'https://ibunker-webscrape.onrender.com/api/ibunker', {vessel: vesselScrape, date:formData.loDate.replaceAll('-','/')}, { headers: {
             'Content-Type' : 'application/json',
             'Accept' : 'application/json',
         } })
@@ -383,7 +384,7 @@ export default function LoadingSurvey() {
                                 <tr>
                                     <th colSpan="2">LO Number</th>
                                     <th className="align-middle" width="100px">
-                                        <button type="button" className="btn btn-sm btn-primary me-2" data-bs-toggle="modal" data-bs-target="#loDetailLoadingModal" onClick={addFromScrape}>iB</button>
+                                        <button type="button" className="btn btn-sm btn-primary me-2" data-bs-toggle="modal" data-bs-target="#loDetailLoadingModal" onClick={addFromScrape} disabled={!formData.tongkang_id? true : false}>iB</button>
                                         <button type="button" className="btn btn-sm btn-success" onClick={addTableRows}>+</button>
                                     </th>
                                 </tr>
