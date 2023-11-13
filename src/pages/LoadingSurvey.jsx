@@ -237,7 +237,7 @@ export default function LoadingSurvey() {
 
     const addFromScrape = async () => {
         setLoadingScrape(loadingScrape)
-        await axios.post('http://localhost:3500/api/ibunker', {vessel: vesselScrape, date:formData.loDate.replaceAll('-','/')}, { headers: {
+        await axios.post('https://ibunker-webscrape.onrender.com/api/ibunker', {vessel: vesselScrape, date:formData.loDate.replaceAll('-','/')}, { headers: {
             'Content-Type' : 'application/json',
             'Accept' : 'application/json',
         } })
